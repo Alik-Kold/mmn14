@@ -120,6 +120,15 @@ int bin_to_decimal(int binary_number)
 char* remove_head(char* str,char* delimiter)
 {
     char* new = malloc(strlen(str) - strlen(delimiter));
-    strcpy(new,str + strlen(delimiter));
+    strcpy(new,str + strlen(delimiter) + 1);
     return new;
+}
+
+int count_occurneces(char* str,char del)
+{
+    int data_len;
+
+    for (data_len=0; str[data_len]; str[data_len]==del ? data_len++ : *str++);
+    return data_len;
+
 }
