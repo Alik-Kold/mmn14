@@ -137,6 +137,7 @@ int extract_macros(char * filename)
         {
             if(StartsWith(line,"rts") || StartsWith(line,"stop"))
             {
+                fprintf(am_file,"\n");
                 fwrite(line, strlen(line),1,am_file);
             }
             else
@@ -146,15 +147,19 @@ int extract_macros(char * filename)
                 {
                     macro_pointer = macro_pointer->next;
                 }
+                fprintf(am_file,"\n");
                 fwrite(macro_pointer->lines, strlen(macro_pointer->lines),1,am_file);
             }
         }
         else
         {
+            fprintf(am_file,"\n");
             fwrite(line, strlen(line),1,am_file);
         }
 
 
     }
+    fclose(am_file);
+    fclose(asm_file);
     return 1;
 }
