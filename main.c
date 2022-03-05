@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
 
     for (; i < argc; i++)
     {
-        result = extract_macros(argv[i]);
+        //result = extract_macros(argv[i]);
         //if (result == 0)
         //    break;
         set_file_extention(argv[i],&am_file_name,".am");

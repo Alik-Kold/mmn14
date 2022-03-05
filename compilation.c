@@ -110,6 +110,9 @@ void create_output_files(struct Symbols_table *pTable, struct Machine_code *pCod
         pCode = pCode->next;
     }
 
+    fclose(ext);
+    fclose(ent);
+    fclose(ob);
 
     }
 int validate_label(char *labelname)
@@ -141,12 +144,13 @@ int validate_command_name(char *command_name)
 int add_to_symbols_table(char *label_name, struct Symbols_table *head,int attr_type,int  base_addr,int  offset ) {
     int errors = 0;
     struct Symbols_table *point;
+    struct Symbols_table *new_node;
     point = head;
     if (point->symbol != NULL)
     {
         while(point)
         {
-            if (strcmp(point->symbol,label_name))
+            if (strcmp(point->symbol,label_name) == 0)
             {
                 if (!point->attribute[attr_type]) {
                     printf("symbol already defined %s \n",label_name);
@@ -155,10 +159,17 @@ int add_to_symbols_table(char *label_name, struct Symbols_table *head,int attr_t
                 }
             }
             if (point->next == NULL)
-                break;
+            {
+                new_node = (struct Symbols_table*)malloc(sizeof (struct Symbols_table));
+                memset(new_node,0,sizeof (struct Symbols_table));
+                point->next = new_node;
+
+            }
+
             point = point->next;
         }
     }
+
     point->symbol = (char *)malloc(strlen(label_name));
     strcpy(point->symbol,label_name);
     point->attribute[attr_type] = 1;
@@ -312,6 +323,7 @@ void compile(char* filename) {
     size_t len;
     int errors = 0;
     char *label_name;
+    char* full_label_name;
     int symbol_def = 0;
     struct Symbols_table *head = (struct Symbols_table *) malloc(sizeof (struct Symbols_table));
     memset(head,0,sizeof (struct Symbols_table));
@@ -329,9 +341,10 @@ void compile(char* filename) {
         if (label_name != NULL) {
             errors = validate_label(label_name);
             symbol_def = 1;
-            realloc(label_name, strlen(label_name) + 1);
-            strcat(label_name,":");
-            line = remove_head(line,label_name);
+            full_label_name = malloc(strlen(label_name) + 1);
+            strcpy(full_label_name,label_name);
+            strcat(full_label_name,":");
+            line = remove_head(line,full_label_name);
         }
         if (strstr(line, ".data") != NULL || strstr(line, ".string") != NULL) {
             if (symbol_def) {

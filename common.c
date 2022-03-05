@@ -120,6 +120,7 @@ int bin_to_decimal(int binary_number)
 char* remove_head(char* str,char* delimiter)
 {
     char* new = malloc(strlen(str) - strlen(delimiter));
+    memset(new,0,strlen(str) + strlen(delimiter) + 1);
     strcpy(new,str + strlen(delimiter) + 1);
     return new;
 }
