@@ -160,7 +160,7 @@ int add_to_symbols_table(char *label_name, struct Symbols_table *head,int attr_t
             }
             if (point->next == NULL)
             {
-                new_node = (struct Symbols_table*)malloc(sizeof (struct Symbols_table));
+                new_node = (struct Symbols_table*)malloc(sizeof (struct Symbols_table)); //vadim why it throwhs exception?
                 memset(new_node,0,sizeof (struct Symbols_table));
                 point->next = new_node;
 
