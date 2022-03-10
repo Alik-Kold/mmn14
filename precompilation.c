@@ -68,16 +68,16 @@ int extract_macros(char * filename)
          * if the line is not a macro do nothing
          * if the line is a macro: save it to the linked list
          */
-        line = clean_empty_space(line);
+        line = trim_whitespaces(line);
         line_len = 0;
-        if (StartsWith(line,"macro"))
+        if (starts_with(line, "macro"))
         {
             while (macro_pointer->next)
             {
                 macro_pointer = macro_pointer->next;
             }
             macro_name = remove_head(line,"macro");
-            macro_name = clean_empty_space(macro_name);
+            macro_name = trim_whitespaces(macro_name);
             if (!validate_macro_name(macro_name))
             {
                 printf("error: %s is a saved word unable to create macro with the same name",macro_name);
@@ -92,8 +92,8 @@ int extract_macros(char * filename)
         {
             do
             {
-                line = clean_empty_space(line);
-                if (!StartsWith(line,"endm"))
+                line = trim_whitespaces(line);
+                if (!starts_with(line, "endm"))
                 {
                     if (line_len == 0)
                     {
@@ -112,7 +112,7 @@ int extract_macros(char * filename)
                     strcat(macro_pointer->lines,line);
                 }
                 getline(&line, &len, asm_file);
-                line = clean_empty_space(line);
+                line = trim_whitespaces(line);
             }while (strcmp(line,"endm") != 0 && read != -1);
             is_macro = 0;
         }
@@ -125,19 +125,19 @@ int extract_macros(char * filename)
          * if the line is not macro save it to the second file
          * if the line is macro search for the macro in the linked list and print it to the second file
          */
-        line = clean_empty_space(line);
-        if (StartsWith(line,"macro"))
+        line = trim_whitespaces(line);
+        if (starts_with(line, "macro"))
         {
-            while(!StartsWith(line,"endm"))
+            while(!starts_with(line, "endm"))
             {
                 getline(&line, &len, asm_file);
-                line = clean_empty_space(line);
+                line = trim_whitespaces(line);
             }
             continue;
         }
         if (countWords(line) == 1)
         {
-            if(StartsWith(line,"rts") || StartsWith(line,"stop"))
+            if(starts_with(line, "rts") || starts_with(line, "stop"))
             {
                 fprintf(am_file,"\n");
                 fwrite(line, strlen(line),1,am_file);

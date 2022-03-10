@@ -53,10 +53,6 @@ enum attributes
 };
 
 
-
-
-
-
 void create_output_files(struct Symbols_table *pTable, struct Machine_code *pCode,char* filename) {
     char *ext_file_name;
     char *ent_file_name;
@@ -115,55 +111,38 @@ void create_output_files(struct Symbols_table *pTable, struct Machine_code *pCod
     fclose(ob);
 
     }
-int validate_label(char *labelname)
-{
+int validate_label(char *labelname){
     int i = 0;
-    for(i = 0; i < LEN_COMMANDS; i++)
-    {
-        if (strcmp(labelname,COMMANDS[i]) == 0)
-            return 0;
-    }
-    for(i = 0; i < LEN_INSTRUCTIONS; i++)
-    {
-        if (strcmp(labelname,INSTRUCTIONS[i]) == 0)
-            return 0;
-    }
+    for(i = 0; i < LEN_COMMANDS;     i++)   if (strcmp(labelname,COMMANDS[i]) == 0)     return 0;
+    for(i = 0; i < LEN_INSTRUCTIONS; i++)   if (strcmp(labelname,INSTRUCTIONS[i]) == 0) return 0;
     return 1;
 }
-int validate_command_name(char *command_name)
-{
-    int i = 0;
+
+int validate_command_name(char *command_name){
+    int i;
     for(i = 0; i < LEN_COMMANDS; i++)
-    {
         if (strcmp(command_name,COMMANDS[i]) == 0)
             return 1;
-    }
     return 0;
 }
 
-int add_to_symbols_table(char *label_name, struct Symbols_table *head,int attr_type,int  base_addr,int  offset ) {
+int add_to_symbols_table(char *label_name, struct Symbols_table *head, int attr_type, int base_addr, int offset ) {
     int errors = 0;
-    struct Symbols_table *point;
-    struct Symbols_table *new_node;
+    struct Symbols_table *point, *new_node;
     point = head;
-    if (point->symbol != NULL)
-    {
-        while(point)
-        {
-            if (strcmp(point->symbol,label_name) == 0)
-            {
+    if (point->symbol != NULL){
+        while(point){
+            if ((point->symbol != NULL) && (!strcmp(point->symbol, label_name))){
                 if (!point->attribute[attr_type]) {
                     printf("symbol already defined %s \n",label_name);
                     errors = 1;
                     break;
                 }
             }
-            if (point->next == NULL)
-            {
-                new_node = (struct Symbols_table*)malloc(sizeof (struct Symbols_table)); //vadim why it throwhs exception?
-                memset(new_node,0,sizeof (struct Symbols_table));
+            if (point->next == NULL){
+                new_node = (struct Symbols_table*)malloc(sizeof (struct Symbols_table)); //vadim why it throws exception?
+                memset(new_node, 0, sizeof (struct Symbols_table));
                 point->next = new_node;
-
             }
 
             point = point->next;
@@ -211,7 +190,7 @@ int *get_data_values(char* line)
  * output int* of the values*/
 {
     char* number_str = remove_head(line, ".data");
-    number_str = clean_empty_space(number_str);
+    number_str = trim_whitespaces(number_str);
     int* numbers;
     struct numbers_struct *nums = (struct numbers_struct*) malloc(sizeof(struct numbers_struct));
     nums->next = NULL;
@@ -221,15 +200,13 @@ int *get_data_values(char* line)
     int list_len = 0;
     int data_len = 0;
 
-    data_len = count_occurneces(number_str,',');
-    if (data_len)
-    {
+    data_len = count_occurrences(number_str, ',');
+    if (data_len){
         number_str = strtok(number_str, ",");
-        number_str = clean_empty_space(number_str);
+        number_str = trim_whitespaces(number_str);
 
     }
-    while(number_str != NULL)
-    {
+    while(number_str != NULL){
         is_minus = 1;
         if (number_str[0] == '-')
         {
@@ -247,14 +224,12 @@ int *get_data_values(char* line)
             }
             list_len ++;
         }
-        else
-        {
-            printf("entered value is not a number! %s",number_str);
+        else {
+            printf("entered value is not a number! %s\n", number_str);
             return 0;
         }
         number_str = strtok(NULL, ",");
-        if (number_str)
-            number_str = clean_empty_space(number_str);
+        if (number_str) number_str = trim_whitespaces(number_str);
     }
     nums = head;
     numbers = malloc(sizeof (int) * list_len);
@@ -270,7 +245,7 @@ int *get_data_values(char* line)
 char* get_string_value(char* line)
 {
     char* str = remove_head(line,".string");
-    str = clean_empty_space(str);
+    str = trim_whitespaces(str);
     return str;
 
 }
@@ -290,54 +265,52 @@ int validate_registers(char* register_name)
 }
 
 
-char* get_label_name(char* line)
-{
+/*char* get_label_name(char* line){
     char* token;
-    char* str = (char*)malloc(strlen(line));
-    strcpy(str,line);
-    if (strstr(line,":"))
-    {
-        token = strtok(str, ":");
-        return token;
-
+    char* str = strdup(line);
+    token = strtok(str, ":");
+    if (!strcmp(token, str))
+        return NULL;
+    return token;
+}*/
+char* get_label_name(char* line){
+    char* place ;
+    int len;
+    place = strstr(line, ":");
+    if (place){
+        len = place - line;
+        return strndup(line, len);
     }
     return NULL;
 }
-char* get_command_name(char* line)
-{
-    char* token;
-    char* str = (char*)malloc(strlen(line));
-    strcpy(str,line);
-    token = strtok(str, " ");
-    return token;
+
+
+char* get_command_name(char* line){
+    char* str = strdup(line);
+    return strtok(str, " ");
 }
+
+
 void compile(char* filename) {
     struct  Machine_code *code_head;
     struct  Machine_code *code_pointer;
-    int IC = 100;
-    int DC = 0;
-    int ICF;
-    int DCF;
-    int read;
-    char *line = (char*) malloc(80);
+    int IC = 100, DC = 0, errors = 0, symbol_def = 0, ICF, DCF, *values, line_num = 0;
+    char *line = (char*) malloc(80), *label_name, *full_label_name, *command_name, *string_value;
     size_t len;
-    int errors = 0;
-    char *label_name;
-    char* full_label_name;
-    int symbol_def = 0;
     struct Symbols_table *head = (struct Symbols_table *) malloc(sizeof (struct Symbols_table));
     memset(head,0,sizeof (struct Symbols_table));
     struct Symbols_table *point = head;
-    int *values;
-    char *string_value;
-    char *command_name;
     FILE *f = fopen(filename, "r");
-    while ((read = getline(&line, &len, f)) != -1) {
+
+
+    while (getline(&line, &len, f) != -1) {
         symbol_def = 0;
-        line = clean_empty_space(line);
-        if(strlen(line) == 0 || line[0] == ';')
-            continue;
+        line = trim_whitespaces(line);
+        line_num++;
+        if(strlen(line) == 0 || line[0] == ';') continue;
+        
         label_name = get_label_name(line);
+
         if (label_name != NULL) {
             errors = validate_label(label_name);
             symbol_def = 1;
@@ -374,7 +347,7 @@ void compile(char* filename) {
             command_name = line;
             command_name = get_command_name(command_name);
             if (!validate_command_name(command_name)) {
-                printf("command name %s not found! ", command_name);
+                printf("command name %s not found!\n", command_name);
                 errors = 0;
             }
             /* TODO:
@@ -397,9 +370,9 @@ void compile(char* filename) {
 
     update_data_symbols(head, ICF, DCF);
     fseek(f, 0, SEEK_SET);
-    while ((read = getline(&line, &len, f)) != -1) {
+    while (getline(&line, &len, f) != -1) {
         symbol_def = 0;
-        line = clean_empty_space(line);
+        line = trim_whitespaces(line);
         label_name = get_label_name(line);
         if (label_name != NULL) {
             continue;
