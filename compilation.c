@@ -11,8 +11,7 @@
 #include "compilation.h"
 
 
-enum opcdes
-{
+enum opcodes{
     mov_oc = 0,
     cmp_oc = 1,
     add_oc = 2,
@@ -25,14 +24,13 @@ enum opcdes
     jmp_oc = 9,
     bne_oc = 9,
     jsr_oc = 9,
-    red_oc= 12,
-    prn_oc= 13,
-    rts_oc= 14,
+    red_oc = 12,
+    prn_oc = 13,
+    rts_oc = 14,
     stop_oc = 15
 };
 
-enum funct
-{
+enum funct{
     add = 10,
     sub = 11,
     clr = 10,
@@ -44,10 +42,9 @@ enum funct
     jsr = 12,
 };
 
-enum attributes
-{
+enum attributes{
     EXTERNAL = 0,
-    CODE = 1,
+    INSTRUCTION = 1,
     ENTRY = 2,
     DATA = 3,
 };
@@ -89,8 +86,7 @@ void create_output_files(struct Symbols_table *pTable, struct Machine_code *pCod
 
     while(pCode) {
         group_name = 'A';
-        for (; i < 6 ; i++)
-        {
+        for (; i < 6 ; i++){
             //i - i+4
             number = pCode->val[i] * 1000 + pCode->val[i + 1] * 100 + pCode->val[i + 2] * 10 + pCode->val[i + 3] * 1;
             number = bin_to_decimal(number);
@@ -109,10 +105,10 @@ void create_output_files(struct Symbols_table *pTable, struct Machine_code *pCod
     fclose(ext);
     fclose(ent);
     fclose(ob);
+}
 
-    }
 int validate_label(char *labelname){
-    int i = 0;
+    int i;
     for(i = 0; i < LEN_COMMANDS;     i++)   if (strcmp(labelname,COMMANDS[i]) == 0)     return 0;
     for(i = 0; i < LEN_INSTRUCTIONS; i++)   if (strcmp(labelname,INSTRUCTIONS[i]) == 0) return 0;
     return 1;
@@ -140,9 +136,10 @@ int add_to_symbols_table(char *label_name, struct Symbols_table *head, int attr_
                 }
             }
             if (point->next == NULL){
-                new_node = (struct Symbols_table*)malloc(sizeof (struct Symbols_table)); //vadim why it throws exception?
+                new_node = (struct Symbols_table*)malloc(sizeof (struct Symbols_table));
                 memset(new_node, 0, sizeof (struct Symbols_table));
                 point->next = new_node;
+                break;
             }
 
             point = point->next;
@@ -150,7 +147,7 @@ int add_to_symbols_table(char *label_name, struct Symbols_table *head, int attr_
     }
 
     point->symbol = (char *)malloc(strlen(label_name));
-    strcpy(point->symbol,label_name);
+    strcpy(point->symbol, label_name);
     point->attribute[attr_type] = 1;
     point->base_addr = base_addr;
     point->offset = offset;
@@ -158,8 +155,8 @@ int add_to_symbols_table(char *label_name, struct Symbols_table *head, int attr_
     return errors;
 }
 
-void update_data_symbols(struct Symbols_table *head,int ICF, int DCF)
-{
+
+void update_data_symbols(struct Symbols_table *head,int ICF, int DCF){
     int errors = 0;
     struct Symbols_table *point;
     point = head;
@@ -168,7 +165,6 @@ void update_data_symbols(struct Symbols_table *head,int ICF, int DCF)
 
         if(point->attribute[DATA])
         {
-
             /*todo: calculate values using offset and base addr*/
             point->offset = 0;
             point->base_addr = 0;
@@ -184,40 +180,32 @@ void update_data_symbols(struct Symbols_table *head,int ICF, int DCF)
 }
 
 
-int *get_data_values(char* line)
-/*get the values of the .data label.
+/* get the values of the .data label.
  * input: entire line
  * output int* of the values*/
-{
+int *get_data_values(char* line){
     char* number_str = remove_head(line, ".data");
-    number_str = trim_whitespaces(number_str);
     int* numbers;
+    int is_minus = 1, i = 0, list_len = 0, data_len = 0;
     struct numbers_struct *nums = (struct numbers_struct*) malloc(sizeof(struct numbers_struct));
     nums->next = NULL;
     struct numbers_struct *head = nums;
-    int is_minus = 1;
-    int i = 0;
-    int list_len = 0;
-    int data_len = 0;
 
+    number_str = trim_whitespaces(number_str);
     data_len = count_occurrences(number_str, ',');
     if (data_len){
         number_str = strtok(number_str, ",");
         number_str = trim_whitespaces(number_str);
-
     }
     while(number_str != NULL){
         is_minus = 1;
-        if (number_str[0] == '-')
-        {
+        if (number_str[0] == '-'){
             number_str++;
             is_minus = -1;
         }
-        if (isNumber (number_str))
-        {
+        if (isNumber (number_str)){
             nums->number = atoi(number_str) * is_minus;
-            if(data_len)
-            {
+            if(data_len){
                 nums->next = (struct numbers_struct*) malloc(sizeof(struct numbers_struct));
                 nums = nums->next;
                 data_len --;
@@ -233,8 +221,7 @@ int *get_data_values(char* line)
     }
     nums = head;
     numbers = malloc(sizeof (int) * list_len);
-    while(nums != NULL)
-    {
+    while(nums != NULL){
         numbers[i] = nums->number;
         nums = nums->next;
         i++;
@@ -242,8 +229,7 @@ int *get_data_values(char* line)
     return (numbers);
 }
 
-char* get_string_value(char* line)
-{
+char* get_string_value(char* line){
     char* str = remove_head(line,".string");
     str = trim_whitespaces(str);
     return str;
@@ -251,32 +237,19 @@ char* get_string_value(char* line)
 }
 
 
-int validate_registers(char* register_name)
-/*check if register is beween r10 and r15*/
-{
+/*check if register is between r10 and r15*/
+int validate_registers(char* register_name){
     char register_num[2];
     int num;
-    strcpy(register_num,register_name + 1);
+    strcpy(register_num, register_name + 1);
     num = atoi(register_name);
-    if (num < 10 || num > 15)
-        return 0;
-    return 1;
-
+    return ((num >= 10) && (num <= 15));
 }
 
 
-/*char* get_label_name(char* line){
-    char* token;
-    char* str = strdup(line);
-    token = strtok(str, ":");
-    if (!strcmp(token, str))
-        return NULL;
-    return token;
-}*/
 char* get_label_name(char* line){
-    char* place ;
+    char* place = strstr(line, ":");
     int len;
-    place = strstr(line, ":");
     if (place){
         len = place - line;
         return strndup(line, len);
@@ -292,18 +265,17 @@ char* get_command_name(char* line){
 
 
 void compile(char* filename) {
-    struct  Machine_code *code_head;
-    struct  Machine_code *code_pointer;
+    struct  Machine_code *code_head, *code_pointer;
     int IC = 100, DC = 0, errors = 0, symbol_def = 0, ICF, DCF, *values, line_num = 0;
     char *line = (char*) malloc(80), *label_name, *full_label_name, *command_name, *string_value;
     size_t len;
     struct Symbols_table *head = (struct Symbols_table *) malloc(sizeof (struct Symbols_table));
-    memset(head,0,sizeof (struct Symbols_table));
+    memset(head, 0, sizeof (struct Symbols_table));
     struct Symbols_table *point = head;
-    FILE *f = fopen(filename, "r");
+    FILE *fd = fopen(filename, "r");
 
 
-    while (getline(&line, &len, f) != -1) {
+    while (getline(&line, &len, fd) != -1) {
         symbol_def = 0;
         line = trim_whitespaces(line);
         line_num++;
@@ -315,8 +287,8 @@ void compile(char* filename) {
             errors = validate_label(label_name);
             symbol_def = 1;
             full_label_name = malloc(strlen(label_name) + 1);
-            strcpy(full_label_name,label_name);
-            strcat(full_label_name,":");
+            strcpy(full_label_name, label_name);
+            strcat(full_label_name, ":");
             line = remove_head(line,full_label_name);
         }
         if (strstr(line, ".data") != NULL || strstr(line, ".string") != NULL) {
@@ -342,7 +314,7 @@ void compile(char* filename) {
         }
         else {
             if (symbol_def) {
-                errors = add_to_symbols_table(label_name, head, CODE, 0, 0);
+                errors = add_to_symbols_table(label_name, head, INSTRUCTION, 0, 0);
             }
             command_name = line;
             command_name = get_command_name(command_name);
@@ -369,8 +341,8 @@ void compile(char* filename) {
 
 
     update_data_symbols(head, ICF, DCF);
-    fseek(f, 0, SEEK_SET);
-    while (getline(&line, &len, f) != -1) {
+    fseek(fd, 0, SEEK_SET);
+    while (getline(&line, &len, fd) != -1) {
         symbol_def = 0;
         line = trim_whitespaces(line);
         label_name = get_label_name(line);

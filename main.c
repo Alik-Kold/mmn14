@@ -36,14 +36,15 @@ const char *INSTRUCTIONS[] = {
 };
 
 int main(int argc, char *argv[]) {
-    int i = 1;
-    int result = 0;
+    int i = 1, result;
     char *am_file_name;
 
     for (; i < argc; i++){
         /*result = extract_macros(argv[i]);
-        if (result == 0)
-            break;*/
+        if (result == 0){
+            printf("precompilation error\nexiting\n");
+            break;
+        }*/
         set_file_extention(argv[i],&am_file_name,".am");
         compile(am_file_name);
     }

@@ -27,7 +27,7 @@ char* trim_whitespaces(char *str){
 
     end = str + strlen(str) - 1;
     while(end > str && isspace((unsigned char)*end)) end--;
-    if (end[0] == '\n') end[0] = '\0';
+    end[1] = '\0';
     return str;
 }
 
@@ -83,18 +83,17 @@ int isNumber(char* str)
     return 1;
 }
 
-void set_file_extention(char* filename,char** dest_pointer,const char* ext)
-{
+
+void set_file_extention(char* filename,char** dest_pointer,const char* ext){
     int len = strlen(filename) + strlen(ext);
     *dest_pointer = (char*)malloc(len);
     memset(*dest_pointer, 0, len);
-    strcpy(*dest_pointer,filename);
-    strcat(*dest_pointer,ext);
-
+    strcpy(*dest_pointer, filename);
+    strcat(*dest_pointer, ext);
 }
 
-int bin_to_decimal(int binary_number)
-{
+
+int bin_to_decimal(int binary_number){
     int remainder;
     int i = 0;
     int hexadecimal_number = 0;
@@ -110,19 +109,20 @@ int bin_to_decimal(int binary_number)
 }
 
 
-char* remove_head(char* str,char* delimiter)
-{
+char* remove_head(char* str,char* delimiter){
     char* new = malloc(strlen(str) - strlen(delimiter));
     memset(new,0,strlen(str) + strlen(delimiter) + 1);
     strcpy(new,str + strlen(delimiter) + 1);
     return new;
 }
 
-int count_occurrences(char* str, char del)
-{
-    int data_len;
 
-    for (data_len=0; str[data_len]; str[data_len]==del ? data_len++ : *str++);
-    return data_len;
+/*
+ * return # of occurrences char_ in str
+ */
+int count_occurrences(char* str, char char_){
+    int cnt;
 
+    for (cnt=0; str[cnt]; str[cnt] == char_ ? cnt++ : *str++);
+    return cnt;
 }

@@ -1,20 +1,12 @@
-//
-// Created by user on 3/5/22.
-//
-
 #ifndef PROJECT_COMPILATION_H
 #define PROJECT_COMPILATION_H
 
-
-
-struct numbers_struct
-{
+struct numbers_struct{
     int number;
     struct numbers_struct* next;
 };
 
-struct Symbols_table
-{
+struct Symbols_table{
     char* symbol;
     int value;
     int base_addr;
@@ -23,11 +15,11 @@ struct Symbols_table
     struct Symbols_table* next;
 };
 
-struct Machine_code
-{
+struct Machine_code{
     int val[20];
     struct Machine_code* next;
 };
+
 
 void analyze_operand_structure(); //todo
 void create_output_files(struct Symbols_table *pTable, struct Machine_code *pCode,char* filename);
