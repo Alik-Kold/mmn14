@@ -5,9 +5,11 @@
 #define PROJECT_ARTIFACTS_H
 #define LEN_COMMANDS 16
 #define LEN_INSTRUCTIONS 4
+#define WORD_BITS 16
 
 extern const char *COMMANDS[];
 extern const char *INSTRUCTIONS[];
+extern const char *OPERAND_PATTERN[];
 
 enum opcodes{
     mov_oc = 0,
@@ -42,9 +44,17 @@ enum funct{
 
 enum attributes{
     EXTERNAL = 0,
-    CODE = 1,
-    ENTRY = 2,
-    DATA = 3,
+    CODE     = 1,
+    ENTRY    = 2,
+    DATA     = 3,
+};
+
+enum operand_types{
+    NUMBER   = 0,
+    STRING   = 1,
+    LABEL    = 2,
+    REGISTER = 3,
+    INDEX    = 4,
 };
 
 #endif //PROJECT_ARTIFACTS_H

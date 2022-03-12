@@ -102,7 +102,10 @@ int bin_to_decimal(int binary_number){
     return (hexadecimal_number);
 }
 
-
+/*
+ * get string and delimiter
+ * return string after first occurrence of delimiter
+ */
 char* remove_head(char* str,char* delimiter){
     char* new = malloc(strlen(str) - strlen(delimiter));
     memset(new,0,strlen(str) + strlen(delimiter) + 1);

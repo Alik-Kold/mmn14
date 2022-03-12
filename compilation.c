@@ -1,39 +1,32 @@
 #include "compilation.h"
 
 
-int analyze_operand_structure(char* str){
-    regex_t re_float, re_var;
-    int result, comp_error = 0;
-    if (regcomp(&re_var, "^[a-zA-Z][a-zA-Z0-9]?+", 0)) ++comp_error;
-    if (regcomp(&re_float, "^[+-]?[0-9]?+[.]?[0-9]?+$", REG_EXTENDED)) ++comp_error;
-    if (comp_error){
-        printf("Failed to compile regex, please amend and recompile\nexit code - %d\n", comp_error);
-        exit(comp_error);
-    }
-    /*
-     * todo: validate we're only getting alphanumeric and +-.[]#
-     * */
-    result = (
-            !(regexec(&re_var, str, 0, NULL, 0)) ||
-            !(regexec(&re_float, str, 0, NULL, 0))
-            );
-    regfree(&re_float), regfree(&re_var);
-    if (!result) printf("invalid token - %s\n", str);
-    return !result;
+int analyze_operand(char* str){
+    str = trim_whitespaces(str);
+
+    if (str[0] == '#') str++;
+    if (regcheck_str(str, OPERAND_PATTERN[REGISTER]))       return REGISTER;
+    if (regcheck_str(str, OPERAND_PATTERN[LABEL]))          return LABEL;
+    if (regcheck_str(str, OPERAND_PATTERN[NUMBER]))         return NUMBER;
+    if (regcheck_str(str, OPERAND_PATTERN[INDEX]))          return INDEX;
+    if (regcheck_str(str, OPERAND_PATTERN[STRING]))         return STRING;
+    return -1;
 }
 
 
-int regcheck_str(char* str, char* pattern){
+int regcheck_str(char* str, const char* pattern){
     regex_t re_pattern;
     int result;
+    printf("%s\n", pattern);
     if (regcomp(&re_pattern, pattern, REG_EXTENDED)){
         printf("Failed to compile regex, please amend and recompile\n");
         exit(1);
     }
-    result = regexec(&re_pattern, str, 0, NULL, 0);
+    result = !regexec(&re_pattern, str, 0, NULL, 0);
     regfree(&re_pattern);
     return result;
 }
+
 
 void create_output_files(struct Symbols_table *pTable, struct Machine_code *pCode,char* filename) {
     char *ext_file_name, *ent_file_name, *ob_file_name, line[80], group_name = 'A';
@@ -83,6 +76,7 @@ void create_output_files(struct Symbols_table *pTable, struct Machine_code *pCod
     fclose(ob);
 }
 
+
 int validate_label(char *labelname){
     int i;
     for(i = 0; i < LEN_COMMANDS;     i++)   if (strcmp(labelname,COMMANDS[i]) == 0)     return 0;
@@ -90,11 +84,13 @@ int validate_label(char *labelname){
     return 1;
 }
 
+
 int validate_command_name(char *command_name){
     int i;
     for(i = 0; i < LEN_COMMANDS; i++) if (strcmp(command_name,COMMANDS[i]) == 0) return 1;
     return 0;
 }
+
 
 int add_to_symbols_table(char *label_name, struct Symbols_table *head, int attr_type, int base_addr, int offset ) {
     int errors = 0;
@@ -234,8 +230,8 @@ char* get_command_name(char* line){
 
 void compile(char* filename) {
     struct  Machine_code *code_head, *code_pointer;
-    int IC = 100, DC = 0, errors = 0, symbol_def = 0, ICF, DCF, *values, line_num = 0;
-    char *line = (char*) malloc(80), *label_name, *full_label_name, *command_name, *string_value;
+    int IC = 100, DC = 0, errors = 0, symbol_def = 0, ICF, DCF, *values, line_num = 0, num_of_operands, operand_type;
+    char *line = (char*) malloc(80), *token, *label_name, *full_label_name, *command_name, *string_value;
     size_t len;
     struct Symbols_table *head = (struct Symbols_table *) malloc(sizeof (struct Symbols_table));
     memset(head, 0, sizeof (struct Symbols_table));
@@ -258,6 +254,7 @@ void compile(char* filename) {
             strcpy(full_label_name, label_name);
             strcat(full_label_name, ":");
             line = remove_head(line,full_label_name);
+            line = trim_whitespaces(line);
         }
         if (strstr(line, ".data") != NULL || strstr(line, ".string") != NULL) {
             if (symbol_def) {
@@ -290,13 +287,23 @@ void compile(char* filename) {
             }
             /* TODO:
              * parse the operation and get the number of operands and size of operation
-             *
-             * build binary code of first word - this should be done on second pass IMO
 
                 IC += L;
 
+            line = remove_head(line,command_name);
+            line = trim_whitespaces(line);
+            if (line) num_of_operands = count_occurrences(line, ',') + 1;
+            token = strtok(line, ",");
+            while (token){
+                token = trim_whitespaces(token);
+                operand_type = analyze_operand(token);
+                if (operand_type == -1){
+                    printf("Invalid operand - %s", token);
+                    return;
+                }
+                token = strtok(NULL, ",");
+            }
              * */
-
         }
 
     }
