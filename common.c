@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*
  * common project generic functions
  */
@@ -34,24 +35,85 @@ unsigned int countWords(char *str){
 
     // Scan all characters one by one
     while (*str){
+=======
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
+
+/*
+ * common functions might be used everywhere
+ */
+
+int StartsWith(const char *a, const char *b)
+/*
+ * check if string start with another string
+ */
+{
+    if(strncmp(a, b, strlen(b)) == 0) return 1;
+    return 0;
+}
+
+char* clean_empty_space(char *str)
+/*
+ * trim leading and traling spaces
+ */
+{
+    char *end;
+
+    while(isspace((unsigned char)*str)) str++;
+
+    if(*str == 0)
+        return str;
+
+    end = str + strlen(str) - 1;
+    while(end > str && isspace((unsigned char)*end)) end--;
+
+    end[1] = '\0';
+
+    return str;
+}
+
+unsigned int countWords(char *str)
+{
+    int state = 0;
+    unsigned int wc = 0;  // word count
+
+    // Scan all characters one by one
+    while (*str)
+    {
+>>>>>>> origin
         // If next character is a separator, set the
         // state as OUT
         if (*str == ' ' || *str == '\n' || *str == '\t')
             state = 0;
 
+<<<<<<< HEAD
         // If next character is not a word separator and
         // state is OUT, then set the state as IN and
         // increment word count
         else if (state == 0){
             state = 1;
             ++word_count;
+=======
+            // If next character is not a word separator and
+            // state is OUT, then set the state as IN and
+            // increment word count
+        else if (state == 0)
+        {
+            state = 1;
+            ++wc;
+>>>>>>> origin
         }
 
         // Move to next character
         ++str;
     }
 
+<<<<<<< HEAD
     return word_count;
+=======
+    return wc;
+>>>>>>> origin
 }
 
 void decToBinary(int n)
@@ -68,6 +130,7 @@ void decToBinary(int n)
 
 }
 
+<<<<<<< HEAD
 int isNumber(char* str){
     int i=0, length;
     if (!str) return 0;
@@ -88,6 +151,31 @@ void set_file_extention(char* filename,char** dest_pointer,const char* ext){
 
 
 int bin_to_decimal(int binary_number){
+=======
+int isNumber(char* str)
+{
+    int length = strlen (str);
+    int i = 0;
+    for (i=0;i<length; i++)
+    if (!isdigit(str[i]))
+    {
+        return(0);
+    }
+    return 1;
+}
+
+void set_file_extention(char* filename,char* dest_pointer,const char* ext)
+{
+    dest_pointer = (char*)malloc(strlen(filename) + strlen(ext));
+    memset(dest_pointer, NULL, strlen(filename) + strlen(ext));
+    strcpy(dest_pointer,filename);
+    strcat(dest_pointer,ext);
+
+}
+
+int bin_to_decimal(int binary_number)
+{
+>>>>>>> origin
     int remainder;
     int i = 0;
     int hexadecimal_number = 0;
@@ -100,6 +188,7 @@ int bin_to_decimal(int binary_number){
         binary_number = binary_number / 10;
     }
     return (hexadecimal_number);
+<<<<<<< HEAD
 }
 
 /*
@@ -148,3 +237,6 @@ char *strndup(const char *s, size_t n) {
 
     return p;
 }
+=======
+}
+>>>>>>> origin
