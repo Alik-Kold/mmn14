@@ -1,11 +1,8 @@
-#include <string.h>
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "common.h"
 /*
- * common functions might be used everywhere
+ * common project generic functions
  */
+
+#include "common.h"
 
 
 /*
@@ -125,4 +122,10 @@ int count_occurrences(char* str, char char_){
 
     for (cnt=0; str[cnt]; str[cnt] == char_ ? cnt++ : *str++);
     return cnt;
+}
+
+
+void write_line_to_file(const char *line, FILE *am_file) {
+    fprintf(am_file, "\n");
+    fwrite(line, strlen(line),1,am_file);
 }

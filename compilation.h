@@ -1,25 +1,13 @@
 #ifndef PROJECT_COMPILATION_H
 #define PROJECT_COMPILATION_H
 
-struct numbers_struct{
-    int number;
-    struct numbers_struct* next;
-};
-
-struct Symbols_table{
-    char* symbol;
-    int value;
-    int base_addr;
-    int offset;
-    int attribute[4];
-    struct Symbols_table* next;
-};
-
-struct Machine_code{
-    int val[20];
-    struct Machine_code* next;
-};
-
+#include "structs.h"
+#include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include "common.h"
+#include "artifacts.h"
+#include <stdio.h>
 
 void analyze_operand_structure(); //todo
 void create_output_files(struct Symbols_table *pTable, struct Machine_code *pCode,char* filename);

@@ -1,54 +1,4 @@
-//
-// Created by user on 2/26/22.
-//
-
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include "common.h"
-#include "reserverd_words.h"
-#include <stdio.h>
 #include "compilation.h"
-
-
-enum opcodes{
-    mov_oc = 0,
-    cmp_oc = 1,
-    add_oc = 2,
-    sub_oc = 2,
-    lea_oc = 4,
-    clr_oc = 5,
-    not_oc = 5,
-    inc_oc = 5,
-    dec_oc = 5,
-    jmp_oc = 9,
-    bne_oc = 9,
-    jsr_oc = 9,
-    red_oc = 12,
-    prn_oc = 13,
-    rts_oc = 14,
-    stop_oc = 15
-};
-
-enum funct{
-    add = 10,
-    sub = 11,
-    clr = 10,
-    not = 11,
-    inc = 12,
-    dec = 13,
-    jmp = 10,
-    bne = 11,
-    jsr = 12,
-};
-
-enum attributes{
-    EXTERNAL = 0,
-    INSTRUCTION = 1,
-    ENTRY = 2,
-    DATA = 3,
-};
-
 
 void create_output_files(struct Symbols_table *pTable, struct Machine_code *pCode,char* filename) {
     char *ext_file_name;
@@ -345,14 +295,12 @@ void compile(char* filename) {
     while (getline(&line, &len, fd) != -1) {
         symbol_def = 0;
         line = trim_whitespaces(line);
+
         label_name = get_label_name(line);
-        if (label_name != NULL) {
-            continue;
-        }
+        if (label_name) continue;
+
         if (strstr(line, ".data") != NULL || strstr(line, ".string") != NULL) {
-            if (symbol_def) {
-                errors = add_to_symbols_table(label_name, head, DATA, 0, 0); //todo: offset and baseaddr?
-            }
+            if (symbol_def) errors = add_to_symbols_table(label_name, head, DATA, 0, 0); //todo: offset and baseaddr?
             if (strstr(line, ".data") != NULL) {
                 values = get_data_values(line);
                 DC += sizeof(values) / sizeof(int);
@@ -373,8 +321,7 @@ void compile(char* filename) {
          * todo: finish encoding (??????????/)
          * */
     }
-    if (errors)
-        return;
+    if (errors) return;
     create_output_files(head,code_head,filename);
 }
 
