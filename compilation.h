@@ -9,7 +9,8 @@
 #include "artifacts.h"
 #include <stdio.h>
 
-void analyze_operand_structure(); //todo
+int analyze_operand_structure(char *); //todo
+int regcheck_str(char*, char*);
 void create_output_files(struct Symbols_table *pTable, struct Machine_code *pCode,char* filename);
 int validate_label(char *labelname);
 int validate_command_name(char *command_name);

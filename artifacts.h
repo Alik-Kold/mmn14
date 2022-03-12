@@ -42,7 +42,7 @@ enum funct{
 
 enum attributes{
     EXTERNAL = 0,
-    INSTRUCTION = 1,
+    CODE = 1,
     ENTRY = 2,
     DATA = 3,
 };

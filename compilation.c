@@ -1,9 +1,42 @@
 #include "compilation.h"
 
+
+int analyze_operand_structure(char* str){
+    regex_t re_float, re_var;
+    int result, comp_error = 0;
+    if (regcomp(&re_var, "^[a-zA-Z][a-zA-Z0-9]?+", 0)) ++comp_error;
+    if (regcomp(&re_float, "^[+-]?[0-9]?+[.]?[0-9]?+$", REG_EXTENDED)) ++comp_error;
+    if (comp_error){
+        printf("Failed to compile regex, please amend and recompile\nexit code - %d\n", comp_error);
+        exit(comp_error);
+    }
+    /*
+     * todo: validate we're only getting alphanumeric and +-.[]#
+     * */
+    result = (
+            !(regexec(&re_var, str, 0, NULL, 0)) ||
+            !(regexec(&re_float, str, 0, NULL, 0))
+            );
+    regfree(&re_float), regfree(&re_var);
+    if (!result) printf("invalid token - %s\n", str);
+    return !result;
+}
+
+
+int regcheck_str(char* str, char* pattern){
+    regex_t re_pattern;
+    int result;
+    if (regcomp(&re_pattern, pattern, REG_EXTENDED)){
+        printf("Failed to compile regex, please amend and recompile\n");
+        exit(1);
+    }
+    result = regexec(&re_pattern, str, 0, NULL, 0);
+    regfree(&re_pattern);
+    return result;
+}
+
 void create_output_files(struct Symbols_table *pTable, struct Machine_code *pCode,char* filename) {
-    char *ext_file_name;
-    char *ent_file_name;
-    char *ob_file_name;
+    char *ext_file_name, *ent_file_name, *ob_file_name, line[80], group_name = 'A';
     set_file_extention(filename,&ext_file_name,".ext");
     set_file_extention(filename,&ent_file_name,".ent");
     set_file_extention(filename,&ob_file_name,".ob");
@@ -12,13 +45,9 @@ void create_output_files(struct Symbols_table *pTable, struct Machine_code *pCod
     FILE* ext = fopen(ext_file_name,"w");
     FILE* ent = fopen(ent_file_name,"w");
     FILE* ob = fopen(ob_file_name,"w");
-    char line[80];
-    int i =0;
-    int number = 0;
+    int number, i =0;
 
-    char group_name = 'A';
-    while(table_point)
-    {
+    while(table_point){
         if (table_point->attribute[EXTERNAL]) {
             sprintf(line,"%s BASE %d",table_point->symbol,table_point->base_addr);
             fwrite(line, strlen(line),1,ext);
@@ -29,9 +58,8 @@ void create_output_files(struct Symbols_table *pTable, struct Machine_code *pCod
             sprintf(line,"%s,%d,%d",table_point->symbol,table_point->base_addr,table_point->offset);
             fwrite(line, strlen(line),1,ent);
         }
-        if (table_point->next == NULL)
-            break;
-    table_point = table_point->next;
+        if (table_point->next == NULL) break;
+        table_point = table_point->next;
     }
 
     while(pCode) {
@@ -40,12 +68,10 @@ void create_output_files(struct Symbols_table *pTable, struct Machine_code *pCod
             //i - i+4
             number = pCode->val[i] * 1000 + pCode->val[i + 1] * 100 + pCode->val[i + 2] * 10 + pCode->val[i + 3] * 1;
             number = bin_to_decimal(number);
-            if(i != 5 && i !=0)
-                sprintf(line,"%s%c%d-",line,group_name,number);
-            else if(i == 5)
-                sprintf(line,"%s%c%d",line,group_name,number);
-            else if(i == 0)
-                sprintf(line,"%c%d-",group_name,number);
+            if      (i == 0)    sprintf(line,"%c%d-",   group_name, number);
+            else if (i == 5)    sprintf(line,"%s%c%d",  line, group_name, number);
+            else                sprintf(line,"%s%c%d-", line, group_name, number);
+
             group_name ++;
         }
         fwrite(line, strlen(line),1,ob);
@@ -66,9 +92,7 @@ int validate_label(char *labelname){
 
 int validate_command_name(char *command_name){
     int i;
-    for(i = 0; i < LEN_COMMANDS; i++)
-        if (strcmp(command_name,COMMANDS[i]) == 0)
-            return 1;
+    for(i = 0; i < LEN_COMMANDS; i++) if (strcmp(command_name,COMMANDS[i]) == 0) return 1;
     return 0;
 }
 
@@ -110,22 +134,16 @@ void update_data_symbols(struct Symbols_table *head,int ICF, int DCF){
     int errors = 0;
     struct Symbols_table *point;
     point = head;
-    while(point)
-    {
-
-        if(point->attribute[DATA])
-        {
+    while(point){
+        if(point->attribute[DATA]){
             /*todo: calculate values using offset and base addr*/
             point->offset = 0;
             point->base_addr = 0;
             point->value = point->offset + point->base_addr;
-
         }
 
-        if (point->next == NULL)
-            break;
+        if (point->next == NULL) break;
         point = point->next;
-
     }
 }
 
@@ -147,7 +165,7 @@ int *get_data_values(char* line){
         number_str = strtok(number_str, ",");
         number_str = trim_whitespaces(number_str);
     }
-    while(number_str != NULL){
+    while(number_str){
         is_minus = 1;
         if (number_str[0] == '-'){
             number_str++;
@@ -179,11 +197,11 @@ int *get_data_values(char* line){
     return (numbers);
 }
 
+
 char* get_string_value(char* line){
     char* str = remove_head(line,".string");
     str = trim_whitespaces(str);
     return str;
-
 }
 
 
@@ -224,7 +242,7 @@ void compile(char* filename) {
     struct Symbols_table *point = head;
     FILE *fd = fopen(filename, "r");
 
-
+    /* 1st pass */
     while (getline(&line, &len, fd) != -1) {
         symbol_def = 0;
         line = trim_whitespaces(line);
@@ -246,7 +264,7 @@ void compile(char* filename) {
                 errors = add_to_symbols_table(label_name, head, DATA, 0, 0); //todo: offset and baseaddr?
             }
             if (strstr(line, ".data") != NULL) {
-                values = get_data_values(line); //todo: should I increase the DC in a case in which there is not symbol defenition?
+                values = get_data_values(line); //todo: should I increase the DC when there is not symbol definition?
                 DC += sizeof(values) / sizeof(int);
             } else {
                 string_value = get_string_value(line);
@@ -263,9 +281,7 @@ void compile(char* filename) {
             continue;
         }
         else {
-            if (symbol_def) {
-                errors = add_to_symbols_table(label_name, head, INSTRUCTION, 0, 0);
-            }
+            if (symbol_def) errors = add_to_symbols_table(label_name, head, CODE, 0, 0);
             command_name = line;
             command_name = get_command_name(command_name);
             if (!validate_command_name(command_name)) {
@@ -275,23 +291,23 @@ void compile(char* filename) {
             /* TODO:
              * parse the operation and get the number of operands and size of operation
              *
-             * build binary code of first word
+             * build binary code of first word - this should be done on second pass IMO
 
                 IC += L;
 
              * */
+
         }
 
     }
 
     ICF = IC;
     DCF = DC;
-    if (errors)
-        return;
-
-
+    if (errors) return;
     update_data_symbols(head, ICF, DCF);
     fseek(fd, 0, SEEK_SET);
+
+    /* 2nd pass */
     while (getline(&line, &len, fd) != -1) {
         symbol_def = 0;
         line = trim_whitespaces(line);

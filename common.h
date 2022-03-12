@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <regex.h>
 
 int starts_with(const char *a, const char *b);
 char* trim_whitespaces(char *str);
@@ -15,5 +16,6 @@ int bin_to_decimal(int binary_number);
 char *remove_head(char* str,char* delimiter);
 int count_occurrences(char* str, char char_);
 void write_line_to_file(const char *, FILE *);
+char *strndup(const char *, size_t);
 
 #endif //PROJECT_COMMON_H

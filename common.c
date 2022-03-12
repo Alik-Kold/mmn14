@@ -30,7 +30,7 @@ char* trim_whitespaces(char *str){
 
 unsigned int countWords(char *str){
     int state = 0;
-    unsigned int wc = 0;  // word count
+    unsigned int word_count = 0;
 
     // Scan all characters one by one
     while (*str){
@@ -39,19 +39,19 @@ unsigned int countWords(char *str){
         if (*str == ' ' || *str == '\n' || *str == '\t')
             state = 0;
 
-            // If next character is not a word separator and
-            // state is OUT, then set the state as IN and
-            // increment word count
+        // If next character is not a word separator and
+        // state is OUT, then set the state as IN and
+        // increment word count
         else if (state == 0){
             state = 1;
-            ++wc;
+            ++word_count;
         }
 
         // Move to next character
         ++str;
     }
 
-    return wc;
+    return word_count;
 }
 
 void decToBinary(int n)
@@ -68,15 +68,12 @@ void decToBinary(int n)
 
 }
 
-int isNumber(char* str)
-{
-    int length = strlen (str);
-    int i = 0;
-    for (i=0;i<length; i++)
-    if (!isdigit(str[i]))
-    {
-        return(0);
-    }
+int isNumber(char* str){
+    int i=0, length;
+    if (!str) return 0;
+    if ((str[0] == '+') || (str[0] == '-')) str++;
+    length = strlen (str);
+    for (;i<length; i++) if (!isdigit(str[i])) return 0;
     return 1;
 }
 
@@ -128,4 +125,23 @@ int count_occurrences(char* str, char char_){
 void write_line_to_file(const char *line, FILE *am_file) {
     fprintf(am_file, "\n");
     fwrite(line, strlen(line),1,am_file);
+}
+
+
+char *strndup(const char *s, size_t n) {
+    /* strndup actually exists in string.h now,
+     * but is defined by the posix 2008 standard,
+     * and wasn't around in the ansi c days.
+     * Pasting it here for the make warning to go away*/
+    char *p;
+    size_t n1;
+
+    for (n1 = 0; n1 < n && s[n1] != '\0'; n1++) continue;
+    p = malloc(n + 1);
+    if (p != NULL) {
+        memcpy(p, s, n1);
+        p[n1] = '\0';
+    }
+
+    return p;
 }
