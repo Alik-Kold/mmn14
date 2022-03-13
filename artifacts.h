@@ -6,6 +6,7 @@
 #define LEN_COMMANDS 16
 #define LEN_INSTRUCTIONS 4
 #define WORD_BITS 16
+#define IC_INIT 100
 
 extern const char *COMMANDS[];
 extern const char *INSTRUCTIONS[];
@@ -42,6 +43,13 @@ enum funct{
     jsr = 12,
 };
 
+enum addressing{
+    IMMEDIATE       = 0,
+    DIRECT          = 1,
+    INDEXING        = 2,
+    REGISTER_DIRECT = 3,
+};
+
 enum attributes{
     EXTERNAL = 0,
     CODE     = 1,
@@ -50,11 +58,14 @@ enum attributes{
 };
 
 enum operand_types{
-    NUMBER   = 0,
-    STRING   = 1,
-    LABEL    = 2,
-    REGISTER = 3,
-    INDEX    = 4,
+    NUMBER          = 0,
+    STRING          = 1,
+    LABEL           = 2,
+    REGISTER        = 3,
+    INDEX           = 4,
+    INDEX_NUMBER    = 5,
+    INDEX_LABEL     = 6,
+    INDEX_REGISTER  = 7,
 };
 
 #endif //PROJECT_ARTIFACTS_H

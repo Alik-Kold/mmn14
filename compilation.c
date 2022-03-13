@@ -2,14 +2,31 @@
 
 
 int analyze_operand(char* str){
+    size_t str_len;
+    int operand_type;
+    char* index;
     str = trim_whitespaces(str);
 
     if (str[0] == '#') str++;
-    if (regcheck_str(str, OPERAND_PATTERN[REGISTER]))       return REGISTER;
-    if (regcheck_str(str, OPERAND_PATTERN[LABEL]))          return LABEL;
-    if (regcheck_str(str, OPERAND_PATTERN[NUMBER]))         return NUMBER;
-    if (regcheck_str(str, OPERAND_PATTERN[INDEX]))          return INDEX;
-    if (regcheck_str(str, OPERAND_PATTERN[STRING]))         return STRING;
+    if (regcheck_str(str, OPERAND_PATTERN[REGISTER]))           return REGISTER;
+    if (regcheck_str(str, OPERAND_PATTERN[LABEL]))              return LABEL;
+    if (regcheck_str(str, OPERAND_PATTERN[NUMBER]))             return NUMBER;
+    if (regcheck_str(str, OPERAND_PATTERN[INDEX])){
+        /*
+        while (str) if ((str++)[0] == '[') break;
+        str_len = strlen(str) - 1;
+        index = trim_whitespaces(strndup(str, str_len));
+        operand_type = analyze_operand(index);
+        switch (operand_type){
+            case REGISTER:  return INDEX_REGISTER;
+            case LABEL:     return INDEX_LABEL;
+            case NUMBER:    return INDEX_NUMBER;
+            default:        return -1;
+        }*/
+        return INDEX;
+    }
+    if (regcheck_str(str, OPERAND_PATTERN[STRING]))             return STRING;
+
     return -1;
 }
 
@@ -17,7 +34,6 @@ int analyze_operand(char* str){
 int regcheck_str(char* str, const char* pattern){
     regex_t re_pattern;
     int result;
-    printf("%s\n", pattern);
     if (regcomp(&re_pattern, pattern, REG_EXTENDED)){
         printf("Failed to compile regex, please amend and recompile\n");
         exit(1);
@@ -126,13 +142,17 @@ int add_to_symbols_table(char *label_name, struct Symbols_table *head, int attr_
 }
 
 
-void update_data_symbols(struct Symbols_table *head,int ICF, int DCF){
+void update_data_symbols(struct Symbols_table *head, int ICF, int DCF){
     int errors = 0;
     struct Symbols_table *point;
     point = head;
     while(point){
         if(point->attribute[DATA]){
-            /*todo: calculate values using offset and base addr*/
+            /*todo: calculate values using offset and base addr.
+             * Once we know the place in memory this this label resides in:
+             * base_addr:   num/16
+             * offset:      num%16
+             * */
             point->offset = 0;
             point->base_addr = 0;
             point->value = point->offset + point->base_addr;
@@ -230,7 +250,7 @@ char* get_command_name(char* line){
 
 void compile(char* filename) {
     struct  Machine_code *code_head, *code_pointer;
-    int IC = 100, DC = 0, errors = 0, symbol_def = 0, ICF, DCF, *values, line_num = 0, num_of_operands, operand_type;
+    int IC = IC_INIT, DC = 0, errors = 0, symbol_def = 0, ICF, DCF, *values, line_num = 0, num_of_operands, operand_type;
     char *line = (char*) malloc(80), *token, *label_name, *full_label_name, *command_name, *string_value;
     size_t len;
     struct Symbols_table *head = (struct Symbols_table *) malloc(sizeof (struct Symbols_table));
@@ -243,7 +263,7 @@ void compile(char* filename) {
         symbol_def = 0;
         line = trim_whitespaces(line);
         line_num++;
-        if(strlen(line) == 0 || line[0] == ';') continue;
+        if(strlen(line) < 2 || line[0] == ';') continue;
         
         label_name = get_label_name(line);
 
@@ -289,7 +309,8 @@ void compile(char* filename) {
              * parse the operation and get the number of operands and size of operation
 
                 IC += L;
-
+             * */
+/*
             line = remove_head(line,command_name);
             line = trim_whitespaces(line);
             if (line) num_of_operands = count_occurrences(line, ',') + 1;
@@ -302,8 +323,7 @@ void compile(char* filename) {
                     return;
                 }
                 token = strtok(NULL, ",");
-            }
-             * */
+            }*/
         }
 
     }
