@@ -78,19 +78,27 @@ void set_file_extention(char* filename,char** dest_pointer,const char* ext){
 }
 
 
-int bin_to_decimal(int binary_number){
-    int remainder;
-    int i = 0;
-    int hexadecimal_number = 0;
+char bin_to_hex(int binary_number){
+    int num = binary_number;
+    int dec_value = 0;
 
-    while (binary_number != 0)
-    {
-        remainder = binary_number % 10;
-        hexadecimal_number = hexadecimal_number + remainder * i;
-        i = i * 2;
-        binary_number = binary_number / 10;
+    int base = 1;
+
+    int temp = num;
+    while (temp) {
+        int last_digit = temp % 10;
+        temp = temp / 10;
+        dec_value += last_digit * base;
+        base = base * 2;
     }
-    return (hexadecimal_number);
+    if (dec_value < 10)
+    {
+        return (dec_value + 48);
+    }
+    else
+    {
+        return (dec_value + 87);
+    }
 }
 
 /*
