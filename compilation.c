@@ -39,34 +39,41 @@ void create_output_files(struct Symbols_table *pTable, struct Machine_code *pCod
     FILE* ent = fopen(ent_file_name,"w");
     FILE* ob = fopen(ob_file_name,"w");
     int number, i =0;
+    char ascii_value;
+    int DC = 100;
 
     while(table_point){
         if (table_point->attribute[EXTERNAL]) {
-            sprintf(line,"%s BASE %d",table_point->symbol,table_point->base_addr);
+            sprintf(line,"%s BASE %d\n",table_point->symbol,table_point->base_addr);
             fwrite(line, strlen(line),1,ext);
-            sprintf(line,"%s OFFSET %d",table_point->symbol,table_point->offset);
+            sprintf(line,"%s OFFSET %d\n\n",table_point->symbol,table_point->offset);
             fwrite(line, strlen(line),1,ext);
         }
         if (table_point->attribute[ENTRY]) {
-            sprintf(line,"%s,%d,%d",table_point->symbol,table_point->base_addr,table_point->offset);
+            sprintf(line,"%s,%d,%d\n",table_point->symbol,table_point->base_addr,table_point->offset);
             fwrite(line, strlen(line),1,ent);
         }
-        if (table_point->next == NULL) break;
+        if (table_point->next == NULL)
+            break;
         table_point = table_point->next;
     }
 
     while(pCode) {
         group_name = 'A';
-        for (; i < 6 ; i++){
+        for (i = 0; i < 5 ; i++){
             //i - i+4
-            number = pCode->val[i] * 1000 + pCode->val[i + 1] * 100 + pCode->val[i + 2] * 10 + pCode->val[i + 3] * 1;
-            number = bin_to_decimal(number);
-            if      (i == 0)    sprintf(line,"%c%d-",   group_name, number);
-            else if (i == 5)    sprintf(line,"%s%c%d",  line, group_name, number);
-            else                sprintf(line,"%s%c%d-", line, group_name, number);
+            number = pCode->val[i * 4] * 1000 + pCode->val[i*4 + 1] * 100 + pCode->val[i*4 + 2] * 10 + pCode->val[i*4 + 3] * 1;
+            ascii_value = bin_to_hex(number);
+            if      (i == 0)
+                sprintf(line,"0%d %c%c-",DC,   group_name, ascii_value);
+            else if (i == 4)
+                sprintf(line,"%s%c%c\n",  line, group_name, ascii_value);
+            else
+                sprintf(line,"%s%c%c-", line, group_name, ascii_value);
 
             group_name ++;
         }
+        DC++;
         fwrite(line, strlen(line),1,ob);
         pCode = pCode->next;
     }
@@ -244,7 +251,7 @@ void compile(char* filename) {
         line = trim_whitespaces(line);
         line_num++;
         if(strlen(line) == 0 || line[0] == ';') continue;
-        
+
         label_name = get_label_name(line);
 
         if (label_name != NULL) {
