@@ -214,9 +214,13 @@ int *get_data_values(char* line){
 }
 
 
-char* get_string_value(char* line){
+char* extract_string(char* line){
     char* str = remove_head(line,".string");
+    size_t len;
     str = trim_whitespaces(str);
+    str++;
+    len = strlen(str);
+    str[len - 1] = '\0';
     return str;
 }
 
@@ -250,7 +254,9 @@ char* get_command_name(char* line){
 
 void compile(char* filename) {
     struct  Machine_code *code_head, *code_pointer;
-    int IC = IC_INIT, DC = 0, errors = 0, symbol_def = 0, ICF, DCF, *values, line_num = 0, num_of_operands, operand_type;
+    int IC = IC_INIT, DC = 0, errors = 0, line_num = 0, symbol_def = 0;
+    int ICF, DCF, num_of_operands, operand_type, offset, arr_len;
+    int * values;
     char *line = (char*) malloc(80), *token, *label_name, *full_label_name, *command_name, *string_value;
     size_t len;
     struct Symbols_table *head = (struct Symbols_table *) malloc(sizeof (struct Symbols_table));
@@ -268,33 +274,34 @@ void compile(char* filename) {
         label_name = get_label_name(line);
 
         if (label_name != NULL) {
-            errors = validate_label(label_name);
             symbol_def = 1;
+            errors += validate_label(label_name);
             full_label_name = malloc(strlen(label_name) + 1);
             strcpy(full_label_name, label_name);
             strcat(full_label_name, ":");
             line = remove_head(line,full_label_name);
             line = trim_whitespaces(line);
         }
-        if (strstr(line, ".data") != NULL || strstr(line, ".string") != NULL) {
-            if (symbol_def) {
-                errors = add_to_symbols_table(label_name, head, DATA, 0, 0); //todo: offset and baseaddr?
-            }
-            if (strstr(line, ".data") != NULL) {
-                values = get_data_values(line); //todo: should I increase the DC when there is not symbol definition?
-                DC += sizeof(values) / sizeof(int);
-            } else {
-                string_value = get_string_value(line);
-                DC += strlen(string_value);
-            }
-            /*todo : data image */
-            continue;
-        } else if (strstr(line, ".extern") != NULL) {
+        if (strstr(line, ".entry") != NULL) continue;
+        if (strstr(line, ".extern") != NULL) {
             label_name = remove_head(line,".extern");
             errors = add_to_symbols_table(label_name, head, EXTERNAL, 0, 0);
             continue;
         }
-        if (strstr(line, ".entry") != NULL) {
+        if (strstr(line, ".data") != NULL || strstr(line, ".string") != NULL) {
+            if (symbol_def) {
+                offset = IC % WORD_BITS;
+                errors = add_to_symbols_table(label_name, head, DATA, IC - offset, offset);
+            }
+            if (strstr(line, ".data") != NULL) {
+                arr_len = count_occurrences(line, ',') + 1;
+                values = get_data_values(line);
+                DC += arr_len;
+            } else {
+                string_value = extract_string(line);
+                DC += strlen(string_value);
+            }
+            /*todo : data image */
             continue;
         }
         else {
@@ -345,10 +352,11 @@ void compile(char* filename) {
         if (strstr(line, ".data") != NULL || strstr(line, ".string") != NULL) {
             if (symbol_def) errors = add_to_symbols_table(label_name, head, DATA, 0, 0); //todo: offset and baseaddr?
             if (strstr(line, ".data") != NULL) {
+                arr_len = count_occurrences(line, ',') + 1;
                 values = get_data_values(line);
-                DC += sizeof(values) / sizeof(int);
+                DC += arr_len;
             } else {
-                string_value = get_string_value(line);
+                string_value = extract_string(line);
                 DC += strlen(string_value);
             }
             /*todo : data image */

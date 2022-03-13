@@ -17,7 +17,7 @@ int validate_command_name(char *command_name);
 int add_to_symbols_table(char *label_name, struct Symbols_table *head,int attr_type,int  base_addr,int  offset );
 void update_data_symbols(struct Symbols_table *head,int ICF, int DCF);
 int *get_data_values(char* line);
-char* get_string_value(char* line);
+char* extract_string(char* line);
 int validate_registers(char* register_name);
 char* get_label_name(char* line);
 void compile(char* filename);
