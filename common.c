@@ -50,21 +50,16 @@ unsigned int countWords(char *str){
     return word_count;
 }
 
-void decToBinary(int n)
-{
-    int binaryNum[32];
-
+void dec_to_binary(int n, int binaryNum[32]){
     int i = 0;
     while (n > 0) {
-
         binaryNum[i] = n % 2;
         n = n / 2;
         i++;
     }
-
 }
 
-int isNumber(char* str){
+int is_number(char* str){
     int i=0, length;
     if (!str) return 0;
     if ((str[0] == '+') || (str[0] == '-')) str++;

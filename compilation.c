@@ -81,7 +81,7 @@ void create_output_files(struct Symbols_table *pTable, struct Machine_code *pCod
             else if (i == 5)    sprintf(line,"%s%c%d",  line, group_name, number);
             else                sprintf(line,"%s%c%d-", line, group_name, number);
 
-            group_name ++;
+            group_name++;
         }
         fwrite(line, strlen(line),1,ob);
         pCode = pCode->next;
@@ -101,13 +101,6 @@ int validate_label(char *labelname){
     int i;
     for(i = 0; i < LEN_COMMANDS;     i++)   if (strcmp(labelname,COMMANDS[i]) == 0)     return 1;
     for(i = 0; i < LEN_INSTRUCTIONS; i++)   if (strcmp(labelname,INSTRUCTIONS[i]) == 0) return 1;
-    return 0;
-}
-
-
-int validate_command_name(char *command_name){
-    int i;
-    for(i = 0; i < LEN_COMMANDS; i++) if (strcmp(command_name,COMMANDS[i]) == 0) return 1;
     return 0;
 }
 
@@ -191,7 +184,7 @@ int *get_data_values(char* line){
             number_str++;
             is_minus = -1;
         }
-        if (isNumber (number_str)){
+        if (is_number(number_str)){
             nums->number = atoi(number_str) * is_minus;
             if(data_len){
                 nums->next = (struct numbers_struct*) malloc(sizeof(struct numbers_struct));
@@ -250,12 +243,6 @@ char* get_label_name(char* line){
 }
 
 
-char* get_command_name(char* line){
-    char* str = strdup(line);
-    return strtok(str, " ");
-}
-
-
 int line_is_too_long(const char *line) {
     size_t len_line = strlen(line);
     if ( len_line > LEN_LINE + 1){
@@ -270,8 +257,8 @@ int line_is_too_long(const char *line) {
 
 void compile(char* filename) {
     struct  Machine_code *code_head, *code_pointer;
-    int IC = IC_INIT, DC = 0, L, errors = 0, line_num = 0, symbol_def = 0;
-    int ICF, DCF, num_of_operands, operand_type, offset, arr_len;
+    int IC = IC_INIT, DC = 0, L, errors = 0, symbol_def = 0;
+    int ICF, DCF, num_of_operands = 0, offset, arr_len;
     int * values;
     char *line = (char*) malloc(LEN_LINE + 1), *token, *label_name, *full_label_name, *command_name, *string_value;
     size_t len, len_line;
@@ -349,33 +336,14 @@ void compile(char* filename) {
          * Handle instruction input
          */
         else {
-            command_name = line;
-            command_name = get_command_name(command_name);
-            if (!validate_command_name(command_name)) {
-                printf("command name %s not found!\n", command_name);
-                errors++;
-            }
             if (symbol_def) errors += add_to_symbols_table(label_name, head, CODE, 0, 0);
 
             /* TODO:
              * parse the operation and get the number of operands and size of operation
-
                 IC += L;
              * */
-/*
-            line = remove_head(line,command_name);
-            line = trim_whitespaces(line);
-            if (line) num_of_operands = count_occurrences(line, ',') + 1;
-            token = strtok(line, ",");
-            while (token){
-                token = trim_whitespaces(token);
-                operand_type = analyze_operand(token);
-                if (operand_type == -1){
-                    printf("Invalid operand - %s", token);
-                    return;
-                }
-                token = strtok(NULL, ",");
-            }*/
+            IC += validate_and_encode_instruction(&errors, line, IC);
+
         }
 
     }
