@@ -21,4 +21,5 @@ int main(int argc, char *argv[]) {
         compile(am_file_name);
     }
     printf("\ndone\n");
+    return EXIT_SUCCESS;
 }

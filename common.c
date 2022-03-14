@@ -16,15 +16,12 @@ int starts_with(const char *a, const char *b) {
  * trim leading and trailing spaces
  */
 char* trim_whitespaces(char *str){
-    char *end;
+    int l = strlen(str);
 
-    while(isspace((unsigned char)*str)) str++;
-    if (*str == 0) return str;
+    while(isspace(str[l - 1])) --l;
+    while(* str && isspace(* str)) ++str, --l;
 
-    end = str + strlen(str) - 1;
-    while(end > str && isspace((unsigned char)*end)) end--;
-    end[1] = '\0';
-    return str;
+    return strndup(str, l);
 }
 
 unsigned int countWords(char *str){
@@ -146,4 +143,21 @@ char *strndup(const char *s, size_t n) {
     }
 
     return p;
+}
+
+
+int validate_printable_only(char *str) {
+    if (!str){
+        printf("Provided string is empty or NULL. This won't do.\n");
+        return 0;
+    }
+    while(str[0] != 0) {
+        if (!isprint(str[0])) {
+            printf("Non-printable character encountered\n"
+                   "ASCII - %d\n", str[0]);
+            return 0;
+        }
+        str++;
+    }
+    return 1;
 }

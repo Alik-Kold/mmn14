@@ -268,17 +268,6 @@ int line_is_too_long(const char *line) {
     return 0;
 }
 
-int validate_string(char *value) {
-    const char * pattern = OPERAND_PATTERN[STRING];
-    if (!regcheck_str(value, pattern)){
-        printf("Invalid string!\n"
-               "string: %s\n"
-               "failed pattern: %s\n", value, pattern);
-        return 0;
-    };
-    return 1;
-}
-
 void compile(char* filename) {
     struct  Machine_code *code_head, *code_pointer;
     int IC = IC_INIT, DC = 0, L, errors = 0, line_num = 0, symbol_def = 0;
@@ -334,11 +323,11 @@ void compile(char* filename) {
          */
         if (strstr(line, ".data") || strstr(line, ".string")) {
             if (strstr(line, ".string")){
-                string_value = extract_string(line);/*
-                if (!validate_string(string_value)){
+                string_value = extract_string(line);
+                if (!validate_printable_only(string_value)){
                     errors++;
                     continue;
-                }*/
+                }
                 L = strlen(string_value);
                 DC += L;
 
