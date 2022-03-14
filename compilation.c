@@ -92,12 +92,16 @@ void create_output_files(struct Symbols_table *pTable, struct Machine_code *pCod
     fclose(ob);
 }
 
-
+/*
+ * Validate label isn't a duplicate or a reserved word
+ * @param labelname - the current str to validate
+ * @return 1 if bad, 0 otherwise
+ */
 int validate_label(char *labelname){
     int i;
-    for(i = 0; i < LEN_COMMANDS;     i++)   if (strcmp(labelname,COMMANDS[i]) == 0)     return 0;
-    for(i = 0; i < LEN_INSTRUCTIONS; i++)   if (strcmp(labelname,INSTRUCTIONS[i]) == 0) return 0;
-    return 1;
+    for(i = 0; i < LEN_COMMANDS;     i++)   if (strcmp(labelname,COMMANDS[i]) == 0)     return 1;
+    for(i = 0; i < LEN_INSTRUCTIONS; i++)   if (strcmp(labelname,INSTRUCTIONS[i]) == 0) return 1;
+    return 0;
 }
 
 
@@ -142,7 +146,7 @@ int add_to_symbols_table(char *label_name, struct Symbols_table *head, int attr_
 }
 
 
-void update_data_symbols(struct Symbols_table *head, int ICF, int DCF){
+void update_data_symbols(struct Symbols_table *head, int IC, int DC){
     int errors = 0;
     struct Symbols_table *point;
     point = head;
@@ -252,13 +256,36 @@ char* get_command_name(char* line){
 }
 
 
+int line_is_too_long(const char *line) {
+    size_t len_line = strlen(line);
+    if ( len_line > LEN_LINE + 1){
+        printf("input line too long\n"
+               "line: %s\n"
+               "line length (or captured up to): %lu\n"
+               "length allowed:                  %d\n", line, len_line, LEN_LINE);
+        return 1;
+    }
+    return 0;
+}
+
+int validate_string(char *value) {
+    const char * pattern = OPERAND_PATTERN[STRING];
+    if (!regcheck_str(value, pattern)){
+        printf("Invalid string!\n"
+               "string: %s\n"
+               "failed pattern: %s\n", value, pattern);
+        return 0;
+    };
+    return 1;
+}
+
 void compile(char* filename) {
     struct  Machine_code *code_head, *code_pointer;
-    int IC = IC_INIT, DC = 0, errors = 0, line_num = 0, symbol_def = 0;
+    int IC = IC_INIT, DC = 0, L, errors = 0, line_num = 0, symbol_def = 0;
     int ICF, DCF, num_of_operands, operand_type, offset, arr_len;
     int * values;
-    char *line = (char*) malloc(80), *token, *label_name, *full_label_name, *command_name, *string_value;
-    size_t len;
+    char *line = (char*) malloc(LEN_LINE + 1), *token, *label_name, *full_label_name, *command_name, *string_value;
+    size_t len, len_line;
     struct Symbols_table *head = (struct Symbols_table *) malloc(sizeof (struct Symbols_table));
     memset(head, 0, sizeof (struct Symbols_table));
     struct Symbols_table *point = head;
@@ -267,13 +294,22 @@ void compile(char* filename) {
     /* 1st pass */
     while (getline(&line, &len, fd) != -1) {
         symbol_def = 0;
+        if (line_is_too_long(line)) {
+            errors++;
+            continue;
+        }
         line = trim_whitespaces(line);
-        line_num++;
         if(strlen(line) < 2 || line[0] == ';') continue;
-        
-        label_name = get_label_name(line);
 
-        if (label_name != NULL) {
+        /*
+         * Check whether first word is a label
+         * Yes -    turn on symbol definition flag
+         *          save teh label
+         *          remove the label from line
+         * No  -    move on
+         */
+        label_name = get_label_name(line);
+        if (label_name) {
             symbol_def = 1;
             errors += validate_label(label_name);
             full_label_name = malloc(strlen(label_name) + 1);
@@ -282,36 +318,56 @@ void compile(char* filename) {
             line = remove_head(line,full_label_name);
             line = trim_whitespaces(line);
         }
-        if (strstr(line, ".entry") != NULL) continue;
-        if (strstr(line, ".extern") != NULL) {
+
+        /*
+         * Handle entry/extern input
+         */
+        if (strstr(line, ".entry")) continue;
+        if (strstr(line, ".extern")) {
             label_name = remove_head(line,".extern");
-            errors = add_to_symbols_table(label_name, head, EXTERNAL, 0, 0);
+            errors += add_to_symbols_table(label_name, head, EXTERNAL, 0, 0);
             continue;
         }
-        if (strstr(line, ".data") != NULL || strstr(line, ".string") != NULL) {
+
+        /*
+         * Handle data input
+         */
+        if (strstr(line, ".data") || strstr(line, ".string")) {
+            if (strstr(line, ".string")){
+                string_value = extract_string(line);/*
+                if (!validate_string(string_value)){
+                    errors++;
+                    continue;
+                }*/
+                L = strlen(string_value);
+                DC += L;
+
+            }
+            else if (strstr(line, ".data")) {
+                L = count_occurrences(line, ',') + 1;
+                values = get_data_values(line);
+                DC += L;
+            }
             if (symbol_def) {
                 offset = IC % WORD_BITS;
-                errors = add_to_symbols_table(label_name, head, DATA, IC - offset, offset);
-            }
-            if (strstr(line, ".data") != NULL) {
-                arr_len = count_occurrences(line, ',') + 1;
-                values = get_data_values(line);
-                DC += arr_len;
-            } else {
-                string_value = extract_string(line);
-                DC += strlen(string_value);
+                errors += add_to_symbols_table(label_name, head, DATA, IC - offset, offset);
             }
             /*todo : data image */
             continue;
         }
+
+        /*
+         * Handle instruction input
+         */
         else {
-            if (symbol_def) errors = add_to_symbols_table(label_name, head, CODE, 0, 0);
             command_name = line;
             command_name = get_command_name(command_name);
             if (!validate_command_name(command_name)) {
                 printf("command name %s not found!\n", command_name);
-                errors = 0;
+                errors++;
             }
+            if (symbol_def) errors += add_to_symbols_table(label_name, head, CODE, 0, 0);
+
             /* TODO:
              * parse the operation and get the number of operands and size of operation
 
@@ -337,7 +393,10 @@ void compile(char* filename) {
 
     ICF = IC;
     DCF = DC;
-    if (errors) return;
+    if (errors) {
+        printf("%d errors found, stopping after 1st pass\n", errors);
+        return;
+    }
     update_data_symbols(head, ICF, DCF);
     fseek(fd, 0, SEEK_SET);
 

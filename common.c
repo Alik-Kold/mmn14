@@ -1,7 +1,6 @@
 /*
  * common project generic functions
  */
-
 #include "common.h"
 
 
@@ -103,7 +102,7 @@ int bin_to_decimal(int binary_number){
 }
 
 /*
- * get string and delimiter
+ * Get string and delimiter
  * return string after first occurrence of delimiter
  */
 char* remove_head(char* str,char* delimiter){
@@ -115,7 +114,7 @@ char* remove_head(char* str,char* delimiter){
 
 
 /*
- * return # of occurrences char_ in str
+ * Return # of occurrences char_ in str
  */
 int count_occurrences(char* str, char char_){
     int cnt;

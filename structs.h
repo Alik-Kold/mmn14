@@ -1,3 +1,6 @@
+/*
+ * Project data structures
+ */
 #ifndef PROJECT_STRUCTS_H
 #define PROJECT_STRUCTS_H
 

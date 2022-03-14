@@ -1,12 +1,14 @@
 /*
- * reserved words, consts and enums
+ * Project reserved words, consts and enums
  */
 #ifndef PROJECT_ARTIFACTS_H
 #define PROJECT_ARTIFACTS_H
 #define LEN_COMMANDS 16
 #define LEN_INSTRUCTIONS 4
 #define WORD_BITS 16
+#define LEN_LINE 80
 #define IC_INIT 100
+#define IC_MAX 8191
 
 extern const char *COMMANDS[];
 extern const char *INSTRUCTIONS[];
