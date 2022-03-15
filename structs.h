@@ -19,6 +19,8 @@ struct Symbols_table{
 };
 
 struct Machine_code{
+    int position;
+    int is_data;
     int val[20];
     struct Machine_code* next;
 };

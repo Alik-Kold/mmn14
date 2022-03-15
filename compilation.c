@@ -256,7 +256,9 @@ int line_is_too_long(const char *line) {
 }
 
 void compile(char* filename) {
-    struct  Machine_code *code_head, *code_pointer;
+    struct  Machine_code *code_head = (struct Machine_code *) malloc(sizeof (struct Machine_code));
+    memset(code_head, 0, sizeof (struct Machine_code));
+    struct Machine_code *machine_point = code_head;
     int IC = IC_INIT, DC = 0, L, errors = 0, symbol_def = 0;
     int ICF, DCF, num_of_operands = 0, offset, arr_len;
     int * values;
@@ -265,6 +267,8 @@ void compile(char* filename) {
     struct Symbols_table *head = (struct Symbols_table *) malloc(sizeof (struct Symbols_table));
     memset(head, 0, sizeof (struct Symbols_table));
     struct Symbols_table *point = head;
+
+
     FILE *fd = fopen(filename, "r");
 
     /* 1st pass */
