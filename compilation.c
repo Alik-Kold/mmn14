@@ -2,31 +2,14 @@
 
 
 int analyze_operand(char* str){
-    size_t str_len;
-    int operand_type;
-    char* index;
     str = trim_whitespaces(str);
 
     if (str[0] == '#') str++;
-    if (regcheck_str(str, OPERAND_PATTERN[REGISTER]))           return REGISTER;
-    if (regcheck_str(str, OPERAND_PATTERN[LABEL]))              return LABEL;
-    if (regcheck_str(str, OPERAND_PATTERN[NUMBER]))             return NUMBER;
-    if (regcheck_str(str, OPERAND_PATTERN[INDEX])){
-        /*
-        while (str) if ((str++)[0] == '[') break;
-        str_len = strlen(str) - 1;
-        index = trim_whitespaces(strndup(str, str_len));
-        operand_type = analyze_operand(index);
-        switch (operand_type){
-            case REGISTER:  return INDEX_REGISTER;
-            case LABEL:     return INDEX_LABEL;
-            case NUMBER:    return INDEX_NUMBER;
-            default:        return -1;
-        }*/
-        return INDEX;
-    }
-    if (regcheck_str(str, OPERAND_PATTERN[STRING]))             return STRING;
-
+    if (regcheck_str(str, OPERAND_PATTERN[REGISTER]))       return REGISTER;
+    if (regcheck_str(str, OPERAND_PATTERN[LABEL]))          return LABEL;
+    if (regcheck_str(str, OPERAND_PATTERN[NUMBER]))         return NUMBER;
+    if (regcheck_str(str, OPERAND_PATTERN[INDEX]))          return INDEX;
+    if (regcheck_str(str, OPERAND_PATTERN[STRING]))         return STRING;
     return -1;
 }
 
@@ -34,6 +17,7 @@ int analyze_operand(char* str){
 int regcheck_str(char* str, const char* pattern){
     regex_t re_pattern;
     int result;
+    printf("%s\n", pattern);
     if (regcomp(&re_pattern, pattern, REG_EXTENDED)){
         printf("Failed to compile regex, please amend and recompile\n");
         exit(1);
@@ -55,34 +39,40 @@ void create_output_files(struct Symbols_table *pTable, struct Machine_code *pCod
     FILE* ent = fopen(ent_file_name,"w");
     FILE* ob = fopen(ob_file_name,"w");
     int number, i =0;
-
+    char ascii_value;
+    int DC = 100;
     while(table_point){
         if (table_point->attribute[EXTERNAL]) {
-            sprintf(line,"%s BASE %d",table_point->symbol,table_point->base_addr);
+            sprintf(line,"%s BASE %d\n",table_point->symbol,table_point->base_addr);
             fwrite(line, strlen(line),1,ext);
-            sprintf(line,"%s OFFSET %d",table_point->symbol,table_point->offset);
+            sprintf(line,"%s OFFSET %d\n\n",table_point->symbol,table_point->offset);
             fwrite(line, strlen(line),1,ext);
         }
         if (table_point->attribute[ENTRY]) {
-            sprintf(line,"%s,%d,%d",table_point->symbol,table_point->base_addr,table_point->offset);
+            sprintf(line,"%s,%d,%d\n",table_point->symbol,table_point->base_addr,table_point->offset);
             fwrite(line, strlen(line),1,ent);
         }
-        if (table_point->next == NULL) break;
+        if (table_point->next == NULL)
+            break;
         table_point = table_point->next;
     }
 
     while(pCode) {
         group_name = 'A';
-        for (; i < 6 ; i++){
+        for (i = 0; i < 5 ; i++){
             //i - i+4
-            number = pCode->val[i] * 1000 + pCode->val[i + 1] * 100 + pCode->val[i + 2] * 10 + pCode->val[i + 3] * 1;
-            number = bin_to_decimal(number);
-            if      (i == 0)    sprintf(line,"%c%d-",   group_name, number);
-            else if (i == 5)    sprintf(line,"%s%c%d",  line, group_name, number);
-            else                sprintf(line,"%s%c%d-", line, group_name, number);
+            number = pCode->val[i * 4] * 1000 + pCode->val[i*4 + 1] * 100 + pCode->val[i*4 + 2] * 10 + pCode->val[i*4 + 3] * 1;
+            ascii_value = bin_to_hex(number);
+            if      (i == 0)
+                sprintf(line,"0%d %c%c-",DC,   group_name, ascii_value);
+            else if (i == 4)
+                sprintf(line,"%s%c%c\n",  line, group_name, ascii_value);
+            else
+                sprintf(line,"%s%c%c-", line, group_name, ascii_value);
 
             group_name++;
         }
+        DC++;
         fwrite(line, strlen(line),1,ob);
         pCode = pCode->next;
     }
@@ -255,6 +245,7 @@ int line_is_too_long(const char *line) {
     return 0;
 }
 
+
 void compile(char* filename) {
     struct  Machine_code *code_head = (struct Machine_code *) malloc(sizeof (struct Machine_code));
     memset(code_head, 0, sizeof (struct Machine_code));
@@ -344,7 +335,22 @@ void compile(char* filename) {
 
             /* TODO:
              * parse the operation and get the number of operands and size of operation
+
                 IC += L;
+
+            line = remove_head(line,command_name);
+            line = trim_whitespaces(line);
+            if (line) num_of_operands = count_occurrences(line, ',') + 1;
+            token = strtok(line, ",");
+            while (token){
+                token = trim_whitespaces(token);
+                operand_type = analyze_operand(token);
+                if (operand_type == -1){
+                    printf("Invalid operand - %s", token);
+                    return;
+                }
+                token = strtok(NULL, ",");
+            }
              * */
             IC += validate_and_encode_instruction(&errors, line, IC);
 
