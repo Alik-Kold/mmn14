@@ -22,7 +22,6 @@ int validate_command_name(char *command_name);
 int validate_label(char *labelname);
 int validate_registers(char* register_name);
 int *get_data_values(char* line);
-char* get_command_name(char* line);
 char* get_label_name(char* line);
 char* extract_string(char* line);
 
