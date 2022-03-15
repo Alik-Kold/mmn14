@@ -92,7 +92,7 @@ int extract_macros(char * filename){
             }
             continue;
         }
-        if (countWords(line) == 1){
+        if (count_words(line) == 1){
             if(starts_with(line, "rts") || starts_with(line, "stop")) write_line_to_file(line, am_file);
             else{
                 macro_pointer = macros_head;

@@ -24,7 +24,7 @@ char* trim_whitespaces(char *str){
     return strndup(str, l);
 }
 
-unsigned int countWords(char *str){
+unsigned int count_words(char *str){
     int state = 0;
     unsigned int word_count = 0;
 
@@ -155,4 +155,20 @@ int validate_printable_only(char *str) {
         str++;
     }
     return 1;
+}
+
+
+/*
+ * Check whether line is longer than LEN_LINE macro
+ */
+int line_is_too_long(const char *line) {
+    size_t len_line = strlen(line);
+    if ( len_line > LEN_LINE + 1){
+        printf("input line too long\n"
+               "line: %s\n"
+               "line length (or captured up to): %lu\n"
+               "length allowed:                  %d\n", line, len_line, LEN_LINE);
+        return 1;
+    }
+    return 0;
 }

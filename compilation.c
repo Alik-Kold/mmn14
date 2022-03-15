@@ -238,18 +238,6 @@ char* get_label_name(char* line){
 }
 
 
-int line_is_too_long(const char *line) {
-    size_t len_line = strlen(line);
-    if ( len_line > LEN_LINE + 1){
-        printf("input line too long\n"
-               "line: %s\n"
-               "line length (or captured up to): %lu\n"
-               "length allowed:                  %d\n", line, len_line, LEN_LINE);
-        return 1;
-    }
-    return 0;
-}
-
 void compile(char* filename) {
     struct  Machine_code *code_head = (struct Machine_code *) malloc(sizeof (struct Machine_code));
     memset(code_head, 0, sizeof (struct Machine_code));
