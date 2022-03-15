@@ -105,7 +105,7 @@ int validate_label(char *labelname){
 }
 
 
-int add_to_symbols_table(char *label_name, struct Symbols_table *head, int attr_type, int base_addr, int offset ) {
+int add_to_symbols_table(char *label_name, struct Symbols_table *head, int attr_type, int base_addr, int offset) {
     int errors = 0;
     struct Symbols_table *point, *new_node;
     point = head;
@@ -139,20 +139,15 @@ int add_to_symbols_table(char *label_name, struct Symbols_table *head, int attr_
 }
 
 
-void update_data_symbols(struct Symbols_table *head, int IC, int DC){
+void update_data_symbols_positions(struct Symbols_table *head, int ICF){
     int errors = 0;
     struct Symbols_table *point;
     point = head;
     while(point){
-        if(point->attribute[DATA]){
-            /*todo: calculate values using offset and base addr.
-             * Once we know the place in memory this this label resides in:
-             * base_addr:   num/16
-             * offset:      num%16
-             * */
-            point->offset = 0;
-            point->base_addr = 0;
-            point->value = point->offset + point->base_addr;
+        if (point->attribute[DATA]){
+            point->value += ICF;
+            point->offset = point->value % WORD_BITS;
+            point->base_addr = point->value - point->offset;
         }
 
         if (point->next == NULL) break;
@@ -329,10 +324,12 @@ void compile(char* filename) {
                 DC += L;
             }
             if (symbol_def) {
-                offset = IC % WORD_BITS;
-                errors += add_to_symbols_table(label_name, head, DATA, IC - offset, offset);
+                errors += add_to_symbols_table(label_name, head, DATA, DC, 0);
+                DC++;
             }
-            /*todo : data image */
+            /*todo : data image
+             * DC += L;
+             */
             continue;
         }
 
@@ -340,11 +337,11 @@ void compile(char* filename) {
          * Handle instruction input
          */
         else {
-            if (symbol_def) errors += add_to_symbols_table(label_name, head, CODE, 0, 0);
+            offset = IC % WORD_BITS;
+            if (symbol_def) errors += add_to_symbols_table(label_name, head, CODE, IC - offset, offset);
 
             /* TODO:
              * parse the operation and get the number of operands and size of operation
-                IC += L;
              * */
             IC += validate_and_encode_instruction(&errors, line, IC);
 
@@ -358,7 +355,7 @@ void compile(char* filename) {
         printf("%d errors found, stopping after 1st pass\n", errors);
         return;
     }
-    update_data_symbols(head, ICF, DCF);
+    update_data_symbols_positions(head, ICF);
     fseek(fd, 0, SEEK_SET);
 
     /* 2nd pass */
@@ -370,7 +367,7 @@ void compile(char* filename) {
         if (label_name) continue;
 
         if (strstr(line, ".data") != NULL || strstr(line, ".string") != NULL) {
-            if (symbol_def) errors = add_to_symbols_table(label_name, head, DATA, 0, 0); //todo: offset and baseaddr?
+            if (symbol_def) errors += add_to_symbols_table(label_name, head, DATA, 0, 0); //todo: offset and baseaddr?
             if (strstr(line, ".data") != NULL) {
                 arr_len = count_occurrences(line, ',') + 1;
                 values = get_data_values(line);
