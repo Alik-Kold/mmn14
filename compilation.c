@@ -131,7 +131,7 @@ int add_to_symbol_table(char *label_name, struct Symbol_table *head, int attr_ty
     }
 
     point->symbol = (char *)malloc(strlen(label_name));
-    strcpy(point->symbol, label_name);
+    point->symbol= strdup(label_name);
     point->attribute[attr_type] = 1;
     point->base_addr = base_addr;
     point->offset = offset;
