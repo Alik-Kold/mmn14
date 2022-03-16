@@ -27,7 +27,7 @@ char* get_command_name(char* line){
 }
 
 
-int validate_and_encode_instruction(int *errors, char *line, int IC) {
+int validate_and_encode_command(int *errors, char *line, int IC) {
     int num_of_operands, expected_num, L;
     char *command_name = get_command_name(line);
 

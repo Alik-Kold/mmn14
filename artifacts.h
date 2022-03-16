@@ -6,12 +6,14 @@
 #define LEN_COMMANDS 16
 #define LEN_INSTRUCTIONS 4
 #define WORD_BITS 16
+#define ARE_BITS_LEN 3
 #define LEN_LINE 80
 #define IC_INIT 100
 #define IC_MAX 8191
 
 extern const char *COMMANDS[];
 extern const char *INSTRUCTIONS[];
+extern const char *ATTRIBUTES[];
 extern const char *OPERAND_PATTERN[];
 
 enum opcodes{
@@ -68,6 +70,12 @@ enum operand_types{
     INDEX_NUMBER    = 5,
     INDEX_LABEL     = 6,
     INDEX_REGISTER  = 7,
+};
+
+enum ARE_BITS{
+    ABSOLUTE_BIT    = 0,
+    RELOCATABLE_BIT = 1,
+    EXTERNAL_BIT    = 2,
 };
 
 #endif //PROJECT_ARTIFACTS_H

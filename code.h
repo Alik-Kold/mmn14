@@ -7,7 +7,7 @@
 #include "common.h"
 #include "structs.h"
 
-int validate_and_encode_instruction(int *errors, char *line, int IC);
+int validate_and_encode_command(int *errors, char *line, int IC);
 int validate_command_name(char *command_name);
 int encode_string(char* str);
 int unexpected_instruction_error(char *instruction, int num_of_operands);

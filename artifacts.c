@@ -24,6 +24,13 @@ const char *INSTRUCTIONS[] = {
         ".extern"
 };
 
+const char *ATTRIBUTES[] = {
+        "EXTERNAL",
+        "CODE",
+        "ENTRY",
+        "DATA",
+};
+
 const char *OPERAND_PATTERN[] = {
         "^[+-]?[0-9]{1,15}$",                   /* NUMBER   */
         "^[ -~]+$",                             /* STRING   */

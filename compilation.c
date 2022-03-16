@@ -44,12 +44,12 @@ int regcheck_str(char* str, const char* pattern){
 }
 
 
-void create_output_files(struct Symbols_table *pTable, struct Machine_code *pCode,char* filename) {
+void create_output_files(struct Symbol_table *pTable, struct Machine_code *pCode, char* filename) {
     char *ext_file_name, *ent_file_name, *ob_file_name, line[80], group_name = 'A';
     set_file_extention(filename,&ext_file_name,".ext");
     set_file_extention(filename,&ent_file_name,".ent");
     set_file_extention(filename,&ob_file_name,".ob");
-    struct Symbols_table *table_point = pTable;
+    struct Symbol_table *table_point = pTable;
 
     FILE* ext = fopen(ext_file_name,"w");
     FILE* ent = fopen(ent_file_name,"w");
@@ -105,13 +105,13 @@ int validate_label(char *labelname){
 }
 
 
-int add_to_symbols_table(char *label_name, struct Symbols_table *head, int attr_type, int base_addr, int offset) {
+int add_to_symbol_table(char *label_name, struct Symbol_table *head, int attr_type, int base_addr, int offset) {
     int errors = 0;
-    struct Symbols_table *point, *new_node;
+    struct Symbol_table *point, *new_node;
     point = head;
-    if (point->symbol != NULL){
+    if (point->symbol){
         while(point){
-            if ((point->symbol != NULL) && (!strcmp(point->symbol, label_name))){
+            if (!point->symbol && (!strcmp(point->symbol, label_name))){
                 if (!point->attribute[attr_type]) {
                     printf("symbol already defined %s \n",label_name);
                     errors = 1;
@@ -119,9 +119,10 @@ int add_to_symbols_table(char *label_name, struct Symbols_table *head, int attr_
                 }
             }
             if (point->next == NULL){
-                new_node = (struct Symbols_table*)malloc(sizeof (struct Symbols_table));
-                memset(new_node, 0, sizeof (struct Symbols_table));
-                point->next = new_node;
+                new_node = (struct Symbol_table*)malloc(sizeof (struct Symbol_table));
+                memset(new_node, 0, sizeof (struct Symbol_table));
+
+                point = point->next = new_node;
                 break;
             }
 
@@ -139,9 +140,9 @@ int add_to_symbols_table(char *label_name, struct Symbols_table *head, int attr_
 }
 
 
-void update_data_symbols_positions(struct Symbols_table *head, int ICF){
+void update_data_symbols_positions(struct Symbol_table *head, int ICF){
     int errors = 0;
-    struct Symbols_table *point;
+    struct Symbol_table *point;
     point = head;
     while(point){
         if (point->attribute[DATA]){
@@ -163,9 +164,9 @@ int *get_data_values(char* line){
     char* number_str = remove_head(line, ".data");
     int* numbers;
     int is_minus = 1, i = 0, list_len = 0, data_len = 0;
-    struct numbers_struct *nums = (struct numbers_struct*) malloc(sizeof(struct numbers_struct));
+    struct Numbers_struct *nums = (struct Numbers_struct*) malloc(sizeof(struct Numbers_struct));
     nums->next = NULL;
-    struct numbers_struct *head = nums;
+    struct Numbers_struct *head = nums;
 
     number_str = trim_whitespaces(number_str);
     data_len = count_occurrences(number_str, ',');
@@ -182,7 +183,7 @@ int *get_data_values(char* line){
         if (is_number(number_str)){
             nums->number = atoi(number_str) * is_minus;
             if(data_len){
-                nums->next = (struct numbers_struct*) malloc(sizeof(struct numbers_struct));
+                nums->next = (struct Numbers_struct*) malloc(sizeof(struct Numbers_struct));
                 nums = nums->next;
                 data_len --;
             }
@@ -242,14 +243,13 @@ void compile(char* filename) {
     struct  Machine_code *code_head = (struct Machine_code *) malloc(sizeof (struct Machine_code));
     memset(code_head, 0, sizeof (struct Machine_code));
     struct Machine_code *machine_point = code_head;
-    int IC = IC_INIT, DC = 0, L, errors = 0, symbol_def = 0;
-    int ICF, DCF, num_of_operands = 0, offset, arr_len;
-    int * values;
-    char *line = (char*) malloc(LEN_LINE + 1), *token, *label_name, *full_label_name, *command_name, *string_value;
-    size_t len, len_line;
-    struct Symbols_table *head = (struct Symbols_table *) malloc(sizeof (struct Symbols_table));
-    memset(head, 0, sizeof (struct Symbols_table));
-    struct Symbols_table *point = head;
+    int IC = IC_INIT, DC = 0, L, errors = 0, symbol_def = 0, ICF, DCF, offset, arr_len;
+    int *values;
+    char *line = (char*) malloc(LEN_LINE + 1), *label_name, *full_label_name, *string_value;
+    size_t len;
+    struct Symbol_table *head = (struct Symbol_table *) malloc(sizeof (struct Symbol_table));
+    memset(head, 0, sizeof (struct Symbol_table));
+    struct Symbol_table *point = head;
 
 
     FILE *fd = fopen(filename, "r");
@@ -288,7 +288,7 @@ void compile(char* filename) {
         if (strstr(line, ".entry")) continue;
         if (strstr(line, ".extern")) {
             label_name = remove_head(line,".extern");
-            errors += add_to_symbols_table(label_name, head, EXTERNAL, 0, 0);
+            errors += add_to_symbol_table(label_name, head, EXTERNAL, 0, 0);
             continue;
         }
 
@@ -312,7 +312,8 @@ void compile(char* filename) {
                 DC += L;
             }
             if (symbol_def) {
-                errors += add_to_symbols_table(label_name, head, DATA, DC, 0);
+                /*printf("%s\n", label_name);*/
+                errors += add_to_symbol_table(label_name, head, DATA, DC, 0);
                 DC++;
             }
             /*todo : data image
@@ -322,16 +323,16 @@ void compile(char* filename) {
         }
 
         /*
-         * Handle instruction input
+         * Handle command input
          */
         else {
             offset = IC % WORD_BITS;
-            if (symbol_def) errors += add_to_symbols_table(label_name, head, CODE, IC - offset, offset);
+            if (symbol_def) errors += add_to_symbol_table(label_name, head, CODE, IC - offset, offset);
 
             /* TODO:
              * parse the operation and get the number of operands and size of operation
              * */
-            IC += validate_and_encode_instruction(&errors, line, IC);
+            IC += validate_and_encode_command(&errors, line, IC);
 
         }
 
@@ -343,6 +344,10 @@ void compile(char* filename) {
         printf("%d errors found, stopping after 1st pass\n", errors);
         return;
     }
+
+    print_symbol_table(head);
+    /* printout_struct(head, "Symbol_table");
+     * */
     update_data_symbols_positions(head, ICF);
     fseek(fd, 0, SEEK_SET);
 
@@ -354,8 +359,8 @@ void compile(char* filename) {
         label_name = get_label_name(line);
         if (label_name) continue;
 
-        if (strstr(line, ".data") != NULL || strstr(line, ".string") != NULL) {
-            if (symbol_def) errors += add_to_symbols_table(label_name, head, DATA, 0, 0); //todo: offset and baseaddr?
+        if (strstr(line, ".data") || strstr(line, ".string")) {
+            if (symbol_def) errors += add_to_symbol_table(label_name, head, DATA, 0, 0); //todo: offset and baseaddr?
             if (strstr(line, ".data") != NULL) {
                 arr_len = count_occurrences(line, ',') + 1;
                 values = get_data_values(line);

@@ -4,24 +4,24 @@
 #ifndef PROJECT_STRUCTS_H
 #define PROJECT_STRUCTS_H
 
-struct numbers_struct{
+struct Numbers_struct{
     int number;
-    struct numbers_struct* next;
+    struct Numbers_struct* next;
 };
 
-struct Symbols_table{
+struct Symbol_table{
     char* symbol;
     int value;
     int base_addr;
     int offset;
-    int attribute[4];
-    struct Symbols_table* next;
+    int attribute[LEN_INSTRUCTIONS];
+    struct Symbol_table* next;
 };
 
 struct Machine_code{
     int position;
     int is_data;
-    int val[20];
+    int val[1 + ARE_BITS_LEN + WORD_BITS]; /* should add up to 20 */
     struct Machine_code* next;
 };
 
