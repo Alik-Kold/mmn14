@@ -71,7 +71,7 @@ int regcheck_str(char* str, const char* pattern){
 
 
 
-int validate_and_encode_command(int *errors, char *line, int IC) {
+int validate_and_encode_command(struct Machine_code *node, int *errors, char *line, int IC) {
     int num_of_operands, expected_num, L;
     char *command_name = get_command_name(line);
 
@@ -87,7 +87,14 @@ int validate_and_encode_command(int *errors, char *line, int IC) {
     expected_num = 0;
     if (num_of_operands == expected_num){
         if (!(strcmp(command_name, "rts")));
-        else if (!(strcmp(command_name, "stop")));
+        else if (!(strcmp(command_name, "stop"))){
+            node->position = IC;
+            node->is_data = 0;
+            dec_to_binary_array(stop_oc, node->val);
+            node->val[18] = 1;
+            node = node->next;
+            return 1;
+        }
         else (*errors) += unexpected_instruction_error(command_name, num_of_operands);
     }
 

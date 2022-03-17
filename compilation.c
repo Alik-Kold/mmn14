@@ -199,7 +199,7 @@ char* get_label_name(char* line){
 void compile(char* filename) {
     struct  Machine_code *code_head = (struct Machine_code *) malloc(sizeof (struct Machine_code));
     memset(code_head, 0, sizeof (struct Machine_code));
-    struct Machine_code *machine_point = code_head;
+    struct Machine_code *code_node = code_head;
     int IC = IC_INIT, DC = 0, L, errors = 0, symbol_def = 0, ICF, DCF, offset, arr_len;
     int *values;
     char *line = (char*) malloc(LEN_LINE + 1), *label_name, *full_label_name, *string_value;
@@ -289,7 +289,7 @@ void compile(char* filename) {
             /* TODO:
              * parse the operation and get the number of operands and size of operation
              * */
-            IC += validate_and_encode_command(&errors, line, IC);
+            IC += validate_and_encode_command(code_node, &errors, line, IC);
 
         }
 
@@ -303,8 +303,9 @@ void compile(char* filename) {
     }
 
     print_symbol_table(head);
-    /* printout_struct(head, "Symbol_table");
-     * */
+    printf("\n");
+    print_machine_code(code_head);
+
     update_data_symbols_positions(head, ICF);
     fseek(fd, 0, SEEK_SET);
 

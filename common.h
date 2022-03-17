@@ -10,6 +10,7 @@
 #include <regex.h>
 #include "artifacts.h"
 
+void dec_to_binary_array(int decimal_number, int result[]);
 void set_file_extention(char* filename,char** dest_pointer,const char* ext);
 void write_line_to_file(const char *, FILE *);
 int bin_to_decimal(int binary_number);

@@ -52,7 +52,7 @@ void print_machine_code(struct Machine_code *head){
     int i;
     struct Machine_code *node = head;
 
-    printf("position\tis_data\tvalues\n");
+    printf("position\tis_data\t\tvalues\n");
     while (node != NULL) {
         print_breaker();
         printf("%d\t\t%d\t\t",node->position, node->is_data);

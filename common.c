@@ -93,6 +93,15 @@ int bin_to_decimal(int binary_number){
     return (hexadecimal_number);
 }
 
+
+void dec_to_binary_array(int decimal_number, int result[]){
+    int i = 0;
+    while (decimal_number){
+        result[i++] = decimal_number % 2;
+        decimal_number /= 2;
+    }
+}
+
 /*
  * Get string and delimiter
  * return string after first occurrence of delimiter
