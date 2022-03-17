@@ -72,10 +72,10 @@ enum operand_types{
     INDEX_REGISTER  = 7,
 };
 
-enum ARE_BITS{
-    ABSOLUTE_BIT    = 0,
-    RELOCATABLE_BIT = 1,
-    EXTERNAL_BIT    = 2,
+enum are_flags{
+    ABSOLUTE_FLAG    = 0,
+    RELOCATABLE_FLAG = 1,
+    EXTERNAL_FLAG    = 2,
 };
 
 #endif //PROJECT_ARTIFACTS_H

@@ -14,7 +14,6 @@
 extern const char *__progname;
 
 void print_symbol_table(struct Symbol_table *head);
-void printout_struct(void* invar, char* structname);
-
+void print_machine_code(struct Machine_code *head);
 
 #endif //PROJECT_TEST_FUNCS_H
