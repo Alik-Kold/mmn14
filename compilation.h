@@ -16,9 +16,7 @@
 void compile(char* filename);
 void create_output_files(struct Symbol_table *pTable, struct Machine_code *pCode, char* filename);
 void update_data_symbols_positions(struct Symbol_table *head, int ICF);
-int analyze_operand(char *); //todo
 int add_to_symbol_table(char *label_name, struct Symbol_table *head, int attr_type, int  base_addr, int  offset );
-int regcheck_str(char*, const char*);
 int validate_command_name(char *command_name);
 int validate_label(char *labelname);
 int validate_registers(char* register_name);

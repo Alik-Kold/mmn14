@@ -1,49 +1,6 @@
 #include "compilation.h"
 
 
-int analyze_operand(char* str){
-    size_t str_len;
-    int operand_type;
-    char* index;
-    str = trim_whitespaces(str);
-
-    if (str[0] == '#') str++;
-    if (regcheck_str(str, OPERAND_PATTERN[REGISTER]))           return REGISTER;
-    if (regcheck_str(str, OPERAND_PATTERN[LABEL]))              return LABEL;
-    if (regcheck_str(str, OPERAND_PATTERN[NUMBER]))             return NUMBER;
-    if (regcheck_str(str, OPERAND_PATTERN[INDEX])){
-        /*
-        while (str) if ((str++)[0] == '[') break;
-        str_len = strlen(str) - 1;
-        index = trim_whitespaces(strndup(str, str_len));
-        operand_type = analyze_operand(index);
-        switch (operand_type){
-            case REGISTER:  return INDEX_REGISTER;
-            case LABEL:     return INDEX_LABEL;
-            case NUMBER:    return INDEX_NUMBER;
-            default:        return -1;
-        }*/
-        return INDEX;
-    }
-    if (regcheck_str(str, OPERAND_PATTERN[STRING]))             return STRING;
-
-    return -1;
-}
-
-
-int regcheck_str(char* str, const char* pattern){
-    regex_t re_pattern;
-    int result;
-    if (regcomp(&re_pattern, pattern, REG_EXTENDED)){
-        printf("Failed to compile regex, please amend and recompile\n");
-        exit(1);
-    }
-    result = !regexec(&re_pattern, str, 0, NULL, 0);
-    regfree(&re_pattern);
-    return result;
-}
-
-
 void create_output_files(struct Symbol_table *pTable, struct Machine_code *pCode, char* filename) {
     char *ext_file_name, *ent_file_name, *ob_file_name, line[80], group_name = 'A';
     set_file_extention(filename,&ext_file_name,".ext");
