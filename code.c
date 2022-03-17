@@ -91,8 +91,9 @@ int validate_and_encode_command(struct Machine_code *node, int *errors, char *li
             node->position = IC;
             node->is_data = 0;
             dec_to_binary_array(stop_oc, node->val);
-            node->val[18] = 1;
-            node = node->next;
+            dec_to_binary_array(RELOCATABLE_FLAG, &node->val[WORD_BITS + 1]);
+            memset(node->next, 0, sizeof (struct Machine_code));
+            node = node->next; /* todo: decide how to pass it back to caller */
             return 1;
         }
         else (*errors) += unexpected_instruction_error(command_name, num_of_operands);

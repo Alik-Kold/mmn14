@@ -10,6 +10,7 @@
 #define LEN_LINE 80
 #define IC_INIT 100
 #define IC_MAX 8191
+#define opcode(n) n ## _oc
 
 extern const char *COMMANDS[];
 extern const char *INSTRUCTIONS[];
