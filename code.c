@@ -45,6 +45,7 @@ int analyze_operand(char* operand){
 
     if (str[0] == '#') str++;
     if (str[0] == '+' || str[0] == '-' || isdigit(str[0])){
+        str++;
         while (str[0] != 0) {
             if (!(isdigit(str[0]))) return -1;
             str++;
@@ -186,7 +187,7 @@ int prep_command(struct Machine_code **node, int *errors, char *line, int IC) {
 
     expected_num = 1;
     if (num_of_operands == expected_num){
-        operand1 = get_operand(line);
+        operand1 = trim_whitespaces(get_operand(line));
         if (!(strcmp(command_name, "clr"))){
             printf("%s\n", operand1);
         }
@@ -244,11 +245,37 @@ int prep_command(struct Machine_code **node, int *errors, char *line, int IC) {
     }
     expected_num = 2;
     if (num_of_operands == expected_num){
-        if (!(strcmp(command_name, "mov")));
-        else if (!(strcmp(command_name, "cmp")));
-        else if (!(strcmp(command_name, "add")));
-        else if (!(strcmp(command_name, "sub")));
-        else if (!(strcmp(command_name, "lea")));
+        operand1 = trim_whitespaces(get_operand(line));
+        operand2 = trim_whitespaces(strstr(line, ","));
+        operand2++;
+        operand1_type = analyze_operand(operand1);
+        operand2_type = analyze_operand(operand2);
+        if (!(strcmp(command_name, "mov"))){
+            printf("command name - %s\n"
+                   "operand1 - %s - %d\n"
+                   "operand2 - %s - %d\n", command_name, operand1, operand1_type, operand2, operand2_type);
+        }
+        else if (!(strcmp(command_name, "cmp")))
+        {
+            printf("command name - %s\n"
+                   "operand1 - %s - %d\n"
+                   "operand2 - %s - %d\n", command_name, operand1, operand1_type, operand2, operand2_type);
+        }
+        else if (!(strcmp(command_name, "add"))){
+            printf("command name - %s\n"
+                   "operand1 - %s - %d\n"
+                   "operand2 - %s - %d\n", command_name, operand1, operand1_type, operand2, operand2_type);
+        }
+        else if (!(strcmp(command_name, "sub"))){
+            printf("command name - %s\n"
+                   "operand1 - %s - %d\n"
+                   "operand2 - %s - %d\n", command_name, operand1, operand1_type, operand2, operand2_type);
+        }
+        else if (!(strcmp(command_name, "lea"))){
+            printf("command name - %s\n"
+                   "operand1 - %s - %d\n"
+                   "operand2 - %s - %d\n", command_name, operand1, operand1_type, operand2, operand2_type);
+        }
         else {
             (*errors) += unexpected_instruction_error(command_name, num_of_operands);
             return -1;
