@@ -168,15 +168,15 @@ int validate_printable_only(char *str) {
 
 
 /*
- * Check whether line is longer than LEN_LINE macro
+ * Check whether line is longer than LINE_MAX_LEN macro
  */
 int line_is_too_long(const char *line) {
     size_t len_line = strlen(line);
-    if ( len_line > LEN_LINE + 1){
+    if (len_line > LINE_MAX_LEN + 1){
         printf("input line too long\n"
                "line: %s\n"
                "line length (or captured up to): %lu\n"
-               "length allowed:                  %d\n", line, len_line, LEN_LINE);
+               "length allowed:                  %d\n", line, len_line, LINE_MAX_LEN);
         return 1;
     }
     return 0;

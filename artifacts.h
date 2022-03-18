@@ -7,7 +7,8 @@
 #define LEN_INSTRUCTIONS 4
 #define WORD_BITS 16
 #define ARE_BITS_LEN 3
-#define LEN_LINE 80
+#define LINE_MAX_LEN 80
+#define LABEL_MAX_LEN 32
 #define IC_INIT 100
 #define IC_MAX 8191
 #define NUM_OF_REGISTERS 16

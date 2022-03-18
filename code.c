@@ -37,9 +37,11 @@ char* get_operand(char* line){
  * return operand type enum
  */
 int analyze_operand(char* operand){
-    size_t str_len;
-    int operand_type, i;
-    char * str = trim_whitespaces(operand);
+    size_t str_len = 1; /* LABEL_MAX_LEN == 32 */
+    int register_compare, i;
+    char * str = trim_whitespaces(operand), register_buffer[NUM_OF_REGISTERS];
+
+    if (!operand) return -1;
 
     if (str[0] == '#') str++;
     if (str[0] == '+' || str[0] == '-' || isdigit(str[0])){
@@ -49,9 +51,36 @@ int analyze_operand(char* operand){
         }
         return NUMBER;
     }
-    if (str[0] == REGISTER_PREFIX_STR[0] && strlen(str) <= 3){ /* REGISTER_PREFIX_STR[0] = 'r' */
-        for (i=0; i < NUM_OF_REGISTERS; i++)
-            if (!strcmp(str, GLUE_REGISTER(REGISTER_PREFIX_STR, i))) return REGISTER;
+    if (str[0] == REGISTER_PREFIX_STR[0] && strlen(str) <= 3){
+        str++;
+        register_compare = atoi(str);
+        for (i=0; i < NUM_OF_REGISTERS; i++) if (register_compare == i) return REGISTER;
+        str--;
+    }
+    if (isalpha(str[0])){
+        str++;
+        while(str[0] != 0){
+            if (str_len > LABEL_MAX_LEN - 1){
+                printf("Label %s too long!\n"
+                       "Label length - %lu\n"
+                       "Allowed - %d", operand, strlen(operand), LABEL_MAX_LEN);
+                return -1;
+            }
+            if (str[0] == '['){
+                switch (analyze_operand(get_str_upto(++str, "]"))) {
+                    case NUMBER:    return INDEX_NUMBER;
+                    case LABEL:     return INDEX_LABEL;
+                    case REGISTER:  return INDEX_REGISTER;
+                    default:        return -1;
+                }
+            }
+            if (isalnum(str[0])) str++, str_len++;
+            else{
+                printf("Invalid label character - %c\n"
+                       "Labels comprise only alphanumerics\n", str[0]);
+                return -1;
+            }
+        }
         return LABEL;
     }
 

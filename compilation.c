@@ -202,7 +202,7 @@ void compile(char* filename) {
     struct Machine_code **code_node = &code_head;
     int IC = IC_INIT, DC = 0, L, errors = 0, symbol_def = 0, ICF, DCF, offset, arr_len;
     int *values;
-    char *line = (char*) malloc(LEN_LINE + 1), *label_name, *full_label_name, *string_value;
+    char *line = (char*) malloc(LINE_MAX_LEN + 1), *label_name, *full_label_name, *string_value;
     size_t len;
     struct Symbol_table *head = (struct Symbol_table *) malloc(sizeof (struct Symbol_table));
     memset(head, 0, sizeof (struct Symbol_table));
