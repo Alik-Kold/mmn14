@@ -65,6 +65,73 @@ int analyze_operand(char* str){
     return -1;
 }
 
+/*
+ *return addressing method based on opcode and optype and if src operand or dst, if invalid, return -1
+ */
+int get_addressing_method(int opcode, int optype,int src)
+{
+    if (optype == NUMBER)
+    {
+        if (src)
+        {
+            if (opcode == clr_oc || opcode == jmp_oc ||
+                opcode == red_oc || opcode == prn_oc || opcode == rts_oc || opcode == stop_oc) // list of allowed methods
+                return -1;
+        }
+        else
+        {
+            if (opcode != cmp_oc && opcode != prn_oc)
+                return -1;
+        }
+        return IMMEDIATE;
+    }
+    if (optype == LABEL)
+    {
+        if (src)
+        {
+            if (opcode != mov_oc && opcode != cmp_oc && opcode != add_oc && opcode != lea_oc) // list of allowed methods
+                return -1;
+        }
+        else
+        {
+            if(opcode == rts_oc || opcode == stop_oc)
+                return -1;
+        }
+        return DIRECT;
+    }
+    if (optype == INDEX_REGISTER)
+    {
+        if (src)
+        {
+            if (opcode != mov_oc && opcode != cmp_oc && opcode != add_oc && opcode != sub_oc) // list of allowed methods
+                return -1;
+        }
+        else
+        {
+            if(opcode == jmp_oc || opcode == rts_oc || opcode == stop_oc)
+                return -1;
+        }
+        return INDEXING;
+    }
+    if (optype == REGISTER)
+    {
+        if (src)
+        {
+            if (opcode != mov_oc && opcode != cmp_oc && opcode == add_oc) // list of allowed methods
+                return -1;
+
+        }
+        else
+        {
+            if(opcode == jmp_oc || opcode == rts_oc || opcode == stop_oc )
+                return -1;
+        }
+        return REGISTER_DIRECT;
+
+    }
+    return -1;
+}
+
 
 int regcheck_str(char* str, const char* pattern){
     regex_t re_pattern;
