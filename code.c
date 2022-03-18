@@ -26,7 +26,16 @@ char* get_command_name(char* line){
     return strtok(str, " ");
 }
 
+char* get_operand(char* line){
+    char* str = strdup(line);
+    return strtok(str, ",");
+}
 
+
+/*
+ * receive operand string str
+ * return operand type enum
+ */
 int analyze_operand(char* str){
     size_t str_len;
     int operand_type;
@@ -70,10 +79,20 @@ int regcheck_str(char* str, const char* pattern){
 }
 
 
+int encode_opcode(struct Machine_code **node, int counter, int opcode, int attribute) {
+    (*node)->position = counter;
+    (*node)->is_data = 0;
+    dec_to_binary_array(opcode, (*node)->val);
+    dec_to_binary_array(attribute, &(*node)->val[WORD_BITS + 1]);
+    (*node)->next = (struct Machine_code * )malloc(sizeof (struct Machine_code));
+    memset((*node)->next, 0, sizeof(struct Machine_code));
+    node = (struct Machine_code **) (*node)->next; /* todo: need to pass this one instead of 1 */
+    return 1;
+}
 
-int validate_and_encode_command(struct Machine_code *node, int *errors, char *line, int IC) {
-    int num_of_operands, expected_num, L;
-    char *command_name = get_command_name(line);
+int prep_command(struct Machine_code **node, int *errors, char *line, int IC) {
+    int num_of_operands, expected_num, L, operand_type;
+    char *command_name = get_command_name(line), *operand;
 
     if (!validate_command_name(command_name)) {
         printf("command name %s not found!\n", command_name);
@@ -86,31 +105,76 @@ int validate_and_encode_command(struct Machine_code *node, int *errors, char *li
 
     expected_num = 0;
     if (num_of_operands == expected_num){
-        if (!(strcmp(command_name, "rts")));
-        else if (!(strcmp(command_name, "stop"))){
-            node->position = IC;
-            node->is_data = 0;
-            dec_to_binary_array(stop_oc, node->val);
-            dec_to_binary_array(RELOCATABLE_FLAG, &node->val[WORD_BITS + 1]);
-            memset(node->next, 0, sizeof (struct Machine_code));
-            node = node->next; /* todo: decide how to pass it back to caller */
-            return 1;
-        }
+        if (!(strcmp(command_name, "rts")))         return encode_opcode(node, IC, rts_oc, RELOCATABLE_FLAG);
+        else if (!(strcmp(command_name, "stop")))   return encode_opcode(node, IC, stop_oc, RELOCATABLE_FLAG);
         else (*errors) += unexpected_instruction_error(command_name, num_of_operands);
     }
 
     expected_num = 1;
     if (num_of_operands == expected_num){
-        if (!(strcmp(command_name, "clr")));
-        else if (!(strcmp(command_name, "not")));
-        else if (!(strcmp(command_name, "inc")));
-        else if (!(strcmp(command_name, "dec")));
-        else if (!(strcmp(command_name, "jmp")));
-        else if (!(strcmp(command_name, "bne")));
-        else if (!(strcmp(command_name, "jsr")));
-        else if (!(strcmp(command_name, "red")));
-        else if (!(strcmp(command_name, "prn")));
-        else (*errors) += unexpected_instruction_error(command_name, num_of_operands);
+        if (!(strcmp(command_name, "clr"))){
+            operand = get_operand(line);
+            printf("%s\n", operand);
+        }
+        else if (!(strcmp(command_name, "not")))
+        {
+            operand = get_operand(line);
+            operand_type = analyze_operand(operand);
+            printf("%s - %d\n", operand, operand_type);
+        }
+
+        else if (!(strcmp(command_name, "inc")))
+        {
+            operand = get_operand(line);
+            operand_type = analyze_operand(operand);
+            printf("%s - %d\n", operand, operand_type);
+        }
+        else if (!(strcmp(command_name, "dec")))
+        {
+            operand = get_operand(line);
+            operand_type = analyze_operand(operand);
+            printf("%s - %d\n", operand, operand_type);
+        }
+        else if (!(strcmp(command_name, "jmp")))
+        {
+            operand = get_operand(line);
+            operand_type = analyze_operand(operand);
+            printf("%s - %d\n", operand, operand_type);
+        }
+        else if (!(strcmp(command_name, "bne")))
+        {
+            operand = get_operand(line);
+            operand_type = analyze_operand(operand);
+            printf("%s - %d\n", operand, operand_type);
+        }
+        else if (!(strcmp(command_name, "jsr")))
+        {
+            operand = get_operand(line);
+            operand_type = analyze_operand(operand);
+            printf("%s - %d\n", operand, operand_type);
+        }
+        else if (!(strcmp(command_name, "red")))
+        {
+            operand = get_operand(line);
+            operand_type = analyze_operand(operand);
+            printf("%s - %d\n", operand, operand_type);
+        }
+        else if (!(strcmp(command_name, "prn")))
+        {
+            operand = get_operand(line);
+            operand_type = analyze_operand(operand);
+            printf("%s - %d\n", operand, operand_type);
+        }
+        else {
+            (*errors) += unexpected_instruction_error(command_name, num_of_operands);
+            return -1;
+        }
+        /* todo:
+         * get operand (remove head or get command or some other implementation)
+         * operand_type = analyze_operand(str)
+         * todo: (alik) determine addressing according to cmd + op_type
+         * todo: (vadim) once we have addressing assignment - implement encode_addressing()
+         * */
     }
     expected_num = 2;
     if (num_of_operands == expected_num){
@@ -119,7 +183,17 @@ int validate_and_encode_command(struct Machine_code *node, int *errors, char *li
         else if (!(strcmp(command_name, "add")));
         else if (!(strcmp(command_name, "sub")));
         else if (!(strcmp(command_name, "lea")));
-        else (*errors) += unexpected_instruction_error(command_name, num_of_operands);
+        else {
+            (*errors) += unexpected_instruction_error(command_name, num_of_operands);
+            return -1;
+        }
+        /* todo:
+         * get operand (remove head or get command or some other implementation)
+         * operand_type = analyze_operand(str)
+         * todo: (alik) determine addressing according to cmd + op_type for second cmd type (2 operands)
+         * todo: (vadim) once we have addressing assignment - implement encode_addressing()
+         * */
+
     }
 
     if (num_of_operands > expected_num) (*errors) += unexpected_instruction_error(command_name, num_of_operands);
@@ -127,3 +201,7 @@ int validate_and_encode_command(struct Machine_code *node, int *errors, char *li
     return L;
 }
 
+int prep_data(struct Machine_code **node, int *errors, char *line, int DC) {
+    int num_of_operands, expected_num, L;
+
+}
