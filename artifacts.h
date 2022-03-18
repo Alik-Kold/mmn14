@@ -10,7 +10,10 @@
 #define LEN_LINE 80
 #define IC_INIT 100
 #define IC_MAX 8191
-#define opcode(n) n ## _oc
+#define NUM_OF_REGISTERS 16
+#define REGISTER_PREFIX r
+#define REGISTER_PREFIX_STR "r"
+#define GLUE_REGISTER(reg, n) reg # n
 
 extern const char *COMMANDS[];
 extern const char *INSTRUCTIONS[];

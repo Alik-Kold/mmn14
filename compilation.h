@@ -22,7 +22,7 @@ int validate_label(char *labelname);
 int validate_registers(char* register_name);
 int *get_data_values(char* line);
 char* get_command_name(char* line);
-char* get_label_name(char* line);
+char* get_str_upto(char* line, char* delim);
 char* extract_string(char* line);
 
 #endif //PROJECT_COMPILATION_H

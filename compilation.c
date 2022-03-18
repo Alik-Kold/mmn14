@@ -185,8 +185,8 @@ int validate_registers(char* register_name){
 }
 
 
-char* get_label_name(char* line){
-    char* place = strstr(line, ":");
+char* get_str_upto(char* line, char* delim){
+    char* place = strstr(line, delim);
     int len;
     if (place){
         len = place - line;
@@ -228,7 +228,7 @@ void compile(char* filename) {
          *          remove the label from line
          * No  -    move on
          */
-        label_name = get_label_name(line);
+        label_name = get_str_upto(line, ":");
         if (label_name) {
             symbol_def = 1;
             errors += validate_label(label_name);
@@ -314,7 +314,7 @@ void compile(char* filename) {
         symbol_def = 0;
         line = trim_whitespaces(line);
 
-        label_name = get_label_name(line);
+        label_name = get_str_upto(line, ":");
         if (label_name) continue;
 
         if (strstr(line, ".data") || strstr(line, ".string")) {
