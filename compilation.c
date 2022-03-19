@@ -286,11 +286,7 @@ void compile(char* filename) {
         else {
             offset = IC % WORD_BITS;
             if (symbol_def) errors += add_to_symbol_table(label_name, head, CODE, IC - offset, offset);
-
-            /* TODO:
-             * parse the operation and get the number of operands and size of operation
-             * */
-            IC += prep_command(&code_node, head, &errors, line, IC);
+            prep_command(&code_node, head, &errors, line, &IC);
 
         }
         line = NULL;

@@ -53,7 +53,7 @@ enum funct{
 };
 
 enum addressing{
-    IMMEDIATE       = 0,
+    IMMEDIATE       = 10,
     DIRECT          = 1,
     INDEXING        = 2,
     REGISTER_DIRECT = 3,

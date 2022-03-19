@@ -154,60 +154,39 @@ int get_addressing_method(int opcode, int operand_type, int src){
 }
 
 
-int encode_opcode(struct Machine_code **node, int counter, int opcode, int attribute) {
-    (*node)->position = counter;
-    (*node)->is_data = 0;
-    dec_to_binary_array(opcode, (*node)->val);
-    dec_to_binary_array(attribute, &(*node)->val[WORD_BITS + 1]);
-    (*node)->next = (struct Machine_code * )malloc(sizeof (struct Machine_code));
-    memset((*node)->next, 0, sizeof(struct Machine_code));
-    *node = (*node)->next;
-    return 1;
-}
-
-
-void encode_register_line(struct Machine_code **node, int counter, int dest_addressing_type, int dest_register,
-                         int src_addressing_type, int src_register, int funct, int attribute) {
-    (*node)->position = counter;
-    (*node)->is_data = 0;
-    dec_to_binary_array(dest_addressing_type,   (*node)->val);
+/*
+ * encode values into binary
+ * addressing word - fill in all the values
+ * opcode / data / string - fill in value to start, attribute, is_data flag, and zeros for the rest
+ * todo: make base_addr and offset into unsigned ints instead of regular ints.
+ * The issue right now is that our machine code structure is in regular ints.
+ * How do we convert without making it "implementation defined" ?
+ */
+void encode(struct Machine_code **node, int * counter, int start, int dest_register,
+            int src_addressing_type, int src_register, int funct, int attribute, int is_data) {
+    (*node)->position = *counter;
+    (*counter)++;
+    (*node)->is_data = is_data;
     dec_to_binary_array(dest_register,          &(*node)->val[2]);
     dec_to_binary_array(src_addressing_type,    &(*node)->val[6]);
     dec_to_binary_array(src_register,           &(*node)->val[8]);
     dec_to_binary_array(funct,                  &(*node)->val[12]);
     dec_to_binary_array(attribute,              &(*node)->val[WORD_BITS + 1]);
+    dec_to_binary_array(start,                  (*node)->val);
     (*node)->next = (struct Machine_code * )malloc(sizeof (struct Machine_code));
     memset((*node)->next, 0, sizeof(struct Machine_code));
     *node = (*node)->next;
 }
 
-/*
- * todo: make base_addr and offset into unsigned ints instead of regular ints.
- * The issue right now is that our machine code structure is in regular ints.
- * How do we convert without making it "implementation defined" ?
- */
-void encode_base_addr_and_offset(struct Machine_code **node, int counter, int base_addr, int offset, int attribute) {
-    (*node)->position = counter;
-    (*node)->is_data = 0;
 
-    /* encode base_addr */
-    dec_to_binary_array(base_addr, (*node)->val);
-    dec_to_binary_array(attribute, &(*node)->val[WORD_BITS + 1]);
-    (*node)->next = (struct Machine_code * )malloc(sizeof (struct Machine_code));
-    memset((*node)->next, 0, sizeof(struct Machine_code));
-    *node = (*node)->next;
-
-    /* encode offset*/
-    dec_to_binary_array(offset,   (*node)->val);
-    dec_to_binary_array(attribute,&(*node)->val[WORD_BITS + 1]);
-    (*node)->next = (struct Machine_code * )malloc(sizeof (struct Machine_code));
-    memset((*node)->next, 0, sizeof(struct Machine_code));
-    *node = (*node)->next;
+int unexpected_addressing_type_error(int dest_addressing_type) {
+    printf("Unexpected addressing type - %d\n", dest_addressing_type);
+    return 1;
 }
 
-int prep_command(struct Machine_code **machine_code_node, struct Symbol_table *symbol_table_head, int *errors, char *line, int IC) {
-    int num_of_operands, expected_num, L = 0, operand1_type, operand2_type;
-    int dest_addressing_type, dest_register, src_addressing_type, src_register;
+void prep_command(struct Machine_code **machine_code_node, struct Symbol_table *symbol_table_head, int *errors, char *line, int * IC) {
+    int num_of_operands, expected_num, operand1_type, operand2_type, opcode;
+    int dest_addressing_type, dest_register = 0, src_addressing_type = 0, src_register = 0;
     char *command_name = get_command_name(line), *operand1, *operand2;
 
     if (!validate_command_name(command_name)) {
@@ -221,8 +200,8 @@ int prep_command(struct Machine_code **machine_code_node, struct Symbol_table *s
 
     expected_num = 0;
     if (num_of_operands == expected_num){
-        if (!(strcmp(command_name, "rts")))         return encode_opcode(machine_code_node, IC, rts_oc, RELOCATABLE_FLAG);
-        else if (!(strcmp(command_name, "stop")))   return encode_opcode(machine_code_node, IC, stop_oc, RELOCATABLE_FLAG);
+        if (!(strcmp(command_name, "rts")))       encode(machine_code_node, IC, rts_oc, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
+        else if (!(strcmp(command_name, "stop"))) encode(machine_code_node, IC, stop_oc, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
         else (*errors) += unexpected_instruction_error(command_name, num_of_operands);
     }
 
@@ -235,31 +214,40 @@ int prep_command(struct Machine_code **machine_code_node, struct Symbol_table *s
         else if (!(strcmp(command_name, "inc"))){
             dest_addressing_type = get_addressing_method(inc_oc, analyze_operand(operand1), 0);
             switch (dest_addressing_type){
+                //todo: why is IMMEDIATE code not used????
+                case IMMEDIATE:
+                    encode(machine_code_node, IC, dest_addressing_type, 0, 0,
+                           0, 0, ABSOLUTE_FLAG, 0);
+                    break;
                 case DIRECT:
-                    encode_base_addr_and_offset(machine_code_node, IC, 0, 0, 0);
-                    L += 2;
-                    IC += 2;
+                    encode(machine_code_node, IC, dest_addressing_type, dest_register, src_addressing_type,
+                           src_register, inc_funct, RELOCATABLE_FLAG, 0);
+                    encode(machine_code_node, IC, 0, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
+                    encode(machine_code_node, IC, 0, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
                     break;
                 case REGISTER_DIRECT:
                     operand1++;
                     dest_register = atoi(operand1);
                     src_register = 0;
                     src_addressing_type = 0;
-                    encode_register_line(machine_code_node, IC, dest_addressing_type, dest_register, src_addressing_type,
-                                              src_register, inc_funct, RELOCATABLE_FLAG);
-                    L++;
-                    IC++;
+                    encode(machine_code_node, IC, dest_addressing_type, dest_register, src_addressing_type,
+                           src_register, inc_funct, RELOCATABLE_FLAG, 0);
                     break;
-
                 case INDEXING:
-                    encode_register_line(machine_code_node, IC, dest_addressing_type, dest_register, src_addressing_type,
-                                              src_register, inc_funct, RELOCATABLE_FLAG);
-                    L++;
-                    IC++;
-                    encode_base_addr_and_offset(machine_code_node, IC, 0, 0, 0);
-                    L += 2;
-                    IC += 2;
+                    if (!validate_registers(operand1)){
+                        printf("invalid register for indexing - %s\n"
+                               "Allowed registers: r10-r15\n", operand1);
+                        (*errors)++;
+                        return;
+                    }
+                    encode(machine_code_node, IC, dest_addressing_type, dest_register, src_addressing_type,
+                           src_register, inc_funct, RELOCATABLE_FLAG, 0);
+                    encode(machine_code_node, IC, 0, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
+                    encode(machine_code_node, IC, 0, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
                     break;
+                default:
+                    (*errors) += unexpected_addressing_type_error(dest_addressing_type);
+                    return;
             }
 
         }
@@ -271,7 +259,7 @@ int prep_command(struct Machine_code **machine_code_node, struct Symbol_table *s
         else if (!(strcmp(command_name, "prn")));
         else {
             (*errors) += unexpected_instruction_error(command_name, num_of_operands);
-            return -1;
+            return;
         }
         /* todo:
          * get operand1 (remove symbol_table_head or get command or some other implementation)
@@ -294,7 +282,7 @@ int prep_command(struct Machine_code **machine_code_node, struct Symbol_table *s
         else if (!(strcmp(command_name, "lea")));
         else {
             (*errors) += unexpected_instruction_error(command_name, num_of_operands);
-            return -1;
+            return;
         }
         /* todo:
          * get operand1 (remove symbol_table_head or get command or some other implementation)
@@ -306,8 +294,6 @@ int prep_command(struct Machine_code **machine_code_node, struct Symbol_table *s
     }
 
     if (num_of_operands > expected_num) (*errors) += unexpected_instruction_error(command_name, num_of_operands);
-
-    return L;
 }
 
 int prep_data(struct Machine_code **node, int *errors, char *line, int DC) {
