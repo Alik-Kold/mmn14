@@ -188,8 +188,10 @@ void prep_command(struct Machine_code **machine_code_node, struct Symbol_table *
 
     expected_num = 0;
     if (num_of_operands == expected_num){
-        if (!(strcmp(command_name, "rts")))       encode(machine_code_node, IC, rts_oc, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
-        else if (!(strcmp(command_name, "stop"))) encode(machine_code_node, IC, stop_oc, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
+        if (!(strcmp(command_name, "rts")))
+            encode(machine_code_node, IC, rts_oc, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
+        else if (!(strcmp(command_name, "stop")))
+            encode(machine_code_node, IC, stop_oc, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
         else (*errors) += unexpected_instruction_error(command_name, num_of_operands);
         return;
     }
