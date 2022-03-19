@@ -289,7 +289,7 @@ int prep_command(struct Machine_code **machine_code_node, struct Symbol_table *s
         operand2_type = analyze_operand(operand2);
         if (!(strcmp(command_name, "mov")));
         else if (!(strcmp(command_name, "cmp")));
-        else if (!(strcmp(command_name, "add_funct")));
+        else if (!(strcmp(command_name, "add")));
         else if (!(strcmp(command_name, "sub")));
         else if (!(strcmp(command_name, "lea")));
         else {

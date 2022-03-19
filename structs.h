@@ -21,7 +21,7 @@ struct Symbol_table{
 struct Machine_code{
     int position;
     int is_data;
-    int val[1 + ARE_BITS_LEN + WORD_BITS]; /* should add_funct up to 20 */
+    int val[1 + ARE_BITS_LEN + WORD_BITS]; /* should add up to 20 */
     struct Machine_code* next;
 };
 
