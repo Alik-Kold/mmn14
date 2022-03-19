@@ -233,7 +233,7 @@ int prep_command(struct Machine_code **machine_code_node, struct Symbol_table *s
         if (!(strcmp(command_name, "clr")));
         else if (!(strcmp(command_name, "not")));
         else if (!(strcmp(command_name, "inc"))){
-            dest_addressing_type = get_addressing_method(inc_oc, analyze_operand(command_name), 0);
+            dest_addressing_type = get_addressing_method(inc_oc, analyze_operand(operand1), 0);
             switch (dest_addressing_type){
                 case DIRECT:
                     encode_base_addr_and_offset(machine_code_node, IC, 0, 0, 0);
