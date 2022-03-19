@@ -165,8 +165,27 @@ int encode_opcode(struct Machine_code **node, int counter, int opcode, int attri
     return 1;
 }
 
-int prep_command(struct Machine_code **node, int *errors, char *line, int IC) {
-    int num_of_operands, expected_num, L, operand1_type, operand2_type;
+
+int encode_register_line(struct Machine_code **node, int counter, int dest_addressing_type, int dest_register,
+                         int src_addressing_type, int src_register, int funct, int attribute) {
+    (*node)->position = counter;
+    (*node)->is_data = 0;
+    dec_to_binary_array(dest_addressing_type,   (*node)->val);
+    dec_to_binary_array(dest_register,          &(*node)->val[2]);
+    dec_to_binary_array(src_addressing_type,    &(*node)->val[6]);
+    dec_to_binary_array(src_register,           &(*node)->val[8]);
+    dec_to_binary_array(funct,                  &(*node)->val[12]);
+    dec_to_binary_array(attribute,              &(*node)->val[WORD_BITS + 1]);
+    (*node)->next = (struct Machine_code * )malloc(sizeof (struct Machine_code));
+    memset((*node)->next, 0, sizeof(struct Machine_code));
+    node = (struct Machine_code **) (*node)->next;
+    return 1;
+}
+
+
+int prep_command(struct Machine_code **machine_code_node, struct Symbol_table *symbol_table_head, int *errors, char *line, int IC) {
+    int num_of_operands, expected_num, L = 0, operand1_type, operand2_type;
+    int dest_addressing_type, dest_register, src_addressing_type, src_register;
     char *command_name = get_command_name(line), *operand1, *operand2;
 
     if (!validate_command_name(command_name)) {
@@ -180,17 +199,32 @@ int prep_command(struct Machine_code **node, int *errors, char *line, int IC) {
 
     expected_num = 0;
     if (num_of_operands == expected_num){
-        if (!(strcmp(command_name, "rts")))         return encode_opcode(node, IC, rts_oc, RELOCATABLE_FLAG);
-        else if (!(strcmp(command_name, "stop")))   return encode_opcode(node, IC, stop_oc, RELOCATABLE_FLAG);
+        if (!(strcmp(command_name, "rts")))         return encode_opcode(machine_code_node, IC, rts_oc, RELOCATABLE_FLAG);
+        else if (!(strcmp(command_name, "stop")))   return encode_opcode(machine_code_node, IC, stop_oc, RELOCATABLE_FLAG);
         else (*errors) += unexpected_instruction_error(command_name, num_of_operands);
     }
 
     expected_num = 1;
     if (num_of_operands == expected_num){
         operand1 = trim_whitespaces(get_operand(line));
+
         if (!(strcmp(command_name, "clr")));
         else if (!(strcmp(command_name, "not")));
         else if (!(strcmp(command_name, "inc"))){
+            dest_addressing_type = get_addressing_method(inc_oc, analyze_operand(command_name), 0);
+            operand1++;
+            dest_register = atoi(operand1);
+            src_register = 0;
+            src_addressing_type = 0;
+            L += encode_register_line(machine_code_node, IC, dest_addressing_type, dest_register,
+                                       src_addressing_type, src_register, inc_funct, RELOCATABLE_FLAG);
+            switch (dest_addressing_type){
+                case DIRECT: printf("chillin"); /*
+                case REGISTER_DIRECT, INDEXING:
+                    L += encode_base_addr();        <<<------------todo
+                    L += encode_offset();           <<<------------todo */
+            }
+
 
         }
         else if (!(strcmp(command_name, "dec")));
@@ -204,7 +238,7 @@ int prep_command(struct Machine_code **node, int *errors, char *line, int IC) {
             return -1;
         }
         /* todo:
-         * get operand1 (remove head or get command or some other implementation)
+         * get operand1 (remove symbol_table_head or get command or some other implementation)
          * operand1_type = analyze_operand(str)
          * todo: (alik) determine addressing according to cmd + op_type
          * todo: (vadim) once we have addressing assignment - implement encode_addressing()
@@ -219,7 +253,7 @@ int prep_command(struct Machine_code **node, int *errors, char *line, int IC) {
         operand2_type = analyze_operand(operand2);
         if (!(strcmp(command_name, "mov")));
         else if (!(strcmp(command_name, "cmp")));
-        else if (!(strcmp(command_name, "add")));
+        else if (!(strcmp(command_name, "add_funct")));
         else if (!(strcmp(command_name, "sub")));
         else if (!(strcmp(command_name, "lea")));
         else {
@@ -227,7 +261,7 @@ int prep_command(struct Machine_code **node, int *errors, char *line, int IC) {
             return -1;
         }
         /* todo:
-         * get operand1 (remove head or get command or some other implementation)
+         * get operand1 (remove symbol_table_head or get command or some other implementation)
          * operand1_type = analyze_operand(str)
          * todo: (alik) determine addressing according to cmd + op_type for second cmd type (2 operands)
          * todo: (vadim) once we have addressing assignment - implement encode_addressing()

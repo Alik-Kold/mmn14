@@ -289,7 +289,7 @@ void compile(char* filename) {
             /* TODO:
              * parse the operation and get the number of operands and size of operation
              * */
-            IC += prep_command(code_node, &errors, line, IC);
+            IC += prep_command(code_node, head, &errors, line, IC);
 
         }
 
@@ -302,10 +302,10 @@ void compile(char* filename) {
         return;
     }
 
-    /*print_symbol_table(head);
-    printf("\n");
+    print_symbol_table(head);
+    printf("\n\n");
     print_machine_code(code_head);
-*/
+
     update_data_symbols_positions(head, ICF);
     fseek(fd, 0, SEEK_SET);
 

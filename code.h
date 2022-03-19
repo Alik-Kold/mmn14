@@ -11,7 +11,7 @@
 
 int analyze_operand(char *);
 int encode_string(char* str);
-int prep_command(struct Machine_code **node, int *errors, char *line, int IC);
+int prep_command(struct Machine_code **machine_code_node, struct Symbol_table *symbol_table_head, int *errors, char *line, int IC);
 int validate_command_name(char *command_name);
 int regcheck_str(char*, const char*);
 int get_addressing_method(int opcode, int operand_type, int src);

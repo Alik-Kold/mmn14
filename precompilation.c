@@ -33,7 +33,7 @@ int extract_macros(char * filename){
     }
     FILE* am_file = fopen(am_file_name,"w");
 
-    /*extract macros from file and add to linked list */
+    /*extract macros from file and add_funct to linked list */
     while ((read = getline(&line, &len, as_file)) != -1) {
         /*
          * if the line is not a macro do nothing

@@ -41,15 +41,15 @@ enum opcodes{
 };
 
 enum funct{
-    add = 10,
-    sub = 11,
-    clr = 10,
-    not = 11,
-    inc = 12,
-    dec = 13,
-    jmp = 10,
-    bne = 11,
-    jsr = 12,
+    add_funct = 10,
+    sub_funct = 11,
+    clr_funct = 10,
+    not_funct = 11,
+    inc_funct = 12,
+    dec_funct = 13,
+    jmp_funct = 10,
+    bne_funct = 11,
+    jsr_funct = 12,
 };
 
 enum addressing{
