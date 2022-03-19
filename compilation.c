@@ -164,35 +164,16 @@ int *get_data_values(char* line){
 }
 
 
-char* extract_string(char* line){
-    char* str = remove_head(line,".string");
-    size_t len;
-    str = trim_whitespaces(str); // the bug is here
-    str++; //todo: vadim! why is it here?
-    len = strlen(str);
-    str[len - 1] = '\0';
-    return str;
-}
-
-
 /*check if register is between r10 and r15*/
 int validate_registers(char* register_name){
-    char register_num[2];
+    if (register_name[0] != 'r'){
+        printf("index not register\n");
+        return 0;
+    }
+    register_name++;
     int num;
-    strcpy(register_num, register_name + 1);
     num = atoi(register_name);
     return ((num >= 10) && (num <= 15));
-}
-
-
-char* get_str_upto(char* line, char* delim){
-    char* place = strstr(line, delim);
-    int len;
-    if (place){
-        len = place - line;
-        return strndup(line, len);
-    }
-    return NULL;
 }
 
 
@@ -255,7 +236,8 @@ void compile(char* filename) {
          */
         if (strstr(line, ".data") || strstr(line, ".string")) {
             if (strstr(line, ".string")){
-                string_value = extract_string(line);
+                line = remove_head(line,".string");
+                string_value = extract_string(line, "\"", "\"");
                 if (!validate_printable_only(string_value)){
                     errors++;
                     continue;
@@ -321,7 +303,8 @@ void compile(char* filename) {
                 values = get_data_values(line);
                 DC += arr_len;
             } else {
-                string_value = extract_string(line);
+                line = remove_head(line,".string");
+                string_value = extract_string(line, "\"", "\"");
                 DC += strlen(string_value);
             }
             /*todo : data image */

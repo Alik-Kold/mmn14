@@ -181,3 +181,21 @@ int line_is_too_long(const char *line) {
     }
     return 0;
 }
+
+
+char* get_str_upto(char* line, char* delim){
+    char* place = strstr(line, delim);
+    int len;
+    if (place){
+        len = place - line;
+        return strndup(line, len);
+    }
+    return NULL;
+}
+
+
+char* extract_string(char* str, char* delim_start, char* delim_end){
+    char *start = strstr(str, delim_start);
+    if (start) return get_str_upto(++start, delim_end);
+    return NULL;
+}
