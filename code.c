@@ -148,18 +148,19 @@ int get_addressing_method(int opcode, int operand_type, int src){
  * todo: make base_addr and offset into unsigned ints instead of regular ints.
  * The issue right now is that our machine code structure is in regular ints.
  * How do we convert without making it "implementation defined" ?
+ * todo: implement two's complement
  */
-void encode(struct Machine_code **node, int * counter, int start, int dest_register,
-            int src_addressing_type, int src_register, int funct, int attribute, int is_data) {
+void encode(struct Machine_code **node, int * counter, int start, int dest_register,int src_addr_type, int src_register,
+        int funct, int attribute, int is_data) {
     (*node)->position = *counter;
     (*counter)++;
     (*node)->is_data = is_data;
-    dec_to_binary_array(dest_register,          &(*node)->val[2]);
-    dec_to_binary_array(src_addressing_type,    &(*node)->val[6]);
-    dec_to_binary_array(src_register,           &(*node)->val[8]);
-    dec_to_binary_array(funct,                  &(*node)->val[12]);
-    dec_to_binary_array(attribute,              &(*node)->val[WORD_BITS + 1]);
-    dec_to_binary_array(start,                  (*node)->val);
+    dec_to_binary_array(dest_register, &(*node)->val[2]);
+    dec_to_binary_array(src_addr_type, &(*node)->val[6]);
+    dec_to_binary_array(src_register,  &(*node)->val[8]);
+    dec_to_binary_array(funct,         &(*node)->val[12]);
+    dec_to_binary_array(attribute,     &(*node)->val[WORD_BITS + 1]);
+    dec_to_binary_array(start,          (*node)->val);
     (*node)->next = (struct Machine_code * )malloc(sizeof (struct Machine_code));
     memset((*node)->next, 0, sizeof(struct Machine_code));
     *node = (*node)->next;
@@ -173,7 +174,7 @@ int unexpected_addressing_type_error(int dest_addressing_type) {
 
 void prep_command(struct Machine_code **machine_code_node, struct Symbol_table *symbol_table_head, int *errors, char *line, int * IC) {
     int num_of_operands, expected_num, operand1_type, operand2_type, opcode = -1, funct = -1;
-    int dest_addressing_type, dest_register = 0, src_addressing_type = 0, src_register = 0;
+    int dest_addr_type, dest_register = 0, src_addressing_type = 0, src_register = 0;
     char *command_name = get_command_name(line), *operand1, *operand2;
 
     if (!validate_command_name(command_name)) {
@@ -247,15 +248,15 @@ void prep_command(struct Machine_code **machine_code_node, struct Symbol_table *
         return;
     }
 
-    dest_addressing_type = get_addressing_method(opcode, analyze_operand(operand1), 0);
-    switch (dest_addressing_type){
+    dest_addr_type = get_addressing_method(opcode, analyze_operand(operand1), 0);
+    switch (dest_addr_type){
         case IMMEDIATE:
-            encode(machine_code_node, IC, dest_addressing_type, 0, 0,
+            encode(machine_code_node, IC, dest_addr_type, 0, 0,
                    0, 0, ABSOLUTE_FLAG, 0);
             break;
         case DIRECT:
-            encode(machine_code_node, IC, dest_addressing_type, dest_register, src_addressing_type,
-                   src_register, funct, RELOCATABLE_FLAG, 0);
+            encode(machine_code_node, IC, dest_addr_type, dest_register, src_addressing_type, src_register,
+                   funct, RELOCATABLE_FLAG, 0);
             encode(machine_code_node, IC, 0, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
             encode(machine_code_node, IC, 0, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
             break;
@@ -264,8 +265,8 @@ void prep_command(struct Machine_code **machine_code_node, struct Symbol_table *
             dest_register = atoi(operand1);
             src_register = 0;
             src_addressing_type = 0;
-            encode(machine_code_node, IC, dest_addressing_type, dest_register, src_addressing_type,
-                   src_register, inc_funct, RELOCATABLE_FLAG, 0);
+            encode(machine_code_node, IC, dest_addr_type, dest_register, src_addressing_type, src_register,
+                   funct, RELOCATABLE_FLAG, 0);
             break;
         case INDEXING:
             operand1 = extract_string(operand1, "[", "]");
@@ -275,13 +276,13 @@ void prep_command(struct Machine_code **machine_code_node, struct Symbol_table *
                 (*errors)++;
                 return;
             }
-            encode(machine_code_node, IC, dest_addressing_type, dest_register, src_addressing_type,
-                   src_register, inc_funct, RELOCATABLE_FLAG, 0);
+            encode(machine_code_node, IC, dest_addr_type, dest_register, src_addressing_type, src_register,
+                   funct, RELOCATABLE_FLAG, 0);
             encode(machine_code_node, IC, 0, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
             encode(machine_code_node, IC, 0, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
             break;
         default:
-            (*errors) += unexpected_addressing_type_error(dest_addressing_type);
+            (*errors) += unexpected_addressing_type_error(dest_addr_type);
             return;
     }
 }
