@@ -161,7 +161,7 @@ int encode_opcode(struct Machine_code **node, int counter, int opcode, int attri
     dec_to_binary_array(attribute, &(*node)->val[WORD_BITS + 1]);
     (*node)->next = (struct Machine_code * )malloc(sizeof (struct Machine_code));
     memset((*node)->next, 0, sizeof(struct Machine_code));
-    node = (struct Machine_code **) (*node)->next; /* todo: need to pass this one instead of 1 */
+    *node = (*node)->next; /* todo: need to pass this one instead of 1 */
     return 1;
 }
 

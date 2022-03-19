@@ -167,8 +167,8 @@ int *get_data_values(char* line){
 char* extract_string(char* line){
     char* str = remove_head(line,".string");
     size_t len;
-    str = trim_whitespaces(str);
-    str++;
+    str = trim_whitespaces(str); // the bug is here
+    str++; //todo: vadim! why is it here?
     len = strlen(str);
     str[len - 1] = '\0';
     return str;
@@ -199,7 +199,7 @@ char* get_str_upto(char* line, char* delim){
 void compile(char* filename) {
     struct  Machine_code *code_head = (struct Machine_code *) malloc(sizeof (struct Machine_code));
     memset(code_head, 0, sizeof (struct Machine_code));
-    struct Machine_code **code_node = &code_head;
+    struct Machine_code *code_node = code_head;
     int IC = IC_INIT, DC = 0, L, errors = 0, symbol_def = 0, ICF, DCF, offset, arr_len;
     int *values;
     char *line = (char*) malloc(LINE_MAX_LEN + 1), *label_name, *full_label_name, *string_value;
@@ -232,7 +232,7 @@ void compile(char* filename) {
         if (label_name) {
             symbol_def = 1;
             errors += validate_label(label_name);
-            full_label_name = malloc(strlen(label_name) + 1);
+            full_label_name = malloc(strlen(label_name) + 2);
             strcpy(full_label_name, label_name);
             strcat(full_label_name, ":");
             line = remove_head(line,full_label_name);
@@ -289,7 +289,7 @@ void compile(char* filename) {
             /* TODO:
              * parse the operation and get the number of operands and size of operation
              * */
-            IC += prep_command(code_node, head, &errors, line, IC);
+            IC += prep_command(&code_node, head, &errors, line, IC);
 
         }
 

@@ -70,7 +70,7 @@ int is_number(char* str){
 
 
 void set_file_extention(char* filename,char** dest_pointer,const char* ext){
-    int len = strlen(filename) + strlen(ext);
+    int len = strlen(filename) + strlen(ext) + 1;
     *dest_pointer = (char*)malloc(len);
     memset(*dest_pointer, 0, len);
     strcpy(*dest_pointer, filename);
@@ -107,8 +107,8 @@ void dec_to_binary_array(int decimal_number, int result[]){
  * return string after first occurrence of delimiter
  */
 char* remove_head(char* str,char* delimiter){
-    char* new = malloc(strlen(str) - strlen(delimiter));
-    memset(new,0,strlen(str) + strlen(delimiter) + 1);
+    char* new = malloc(strlen(str) - strlen(delimiter) +1);
+    memset(new,0,strlen(str) - strlen(delimiter) + 1);
     strcpy(new,str + strlen(delimiter) + 1);
     return new;
 }
