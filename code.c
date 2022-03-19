@@ -161,12 +161,12 @@ int encode_opcode(struct Machine_code **node, int counter, int opcode, int attri
     dec_to_binary_array(attribute, &(*node)->val[WORD_BITS + 1]);
     (*node)->next = (struct Machine_code * )malloc(sizeof (struct Machine_code));
     memset((*node)->next, 0, sizeof(struct Machine_code));
-    *node = (*node)->next; /* todo: need to pass this one instead of 1 */
+    *node = (*node)->next;
     return 1;
 }
 
 
-int encode_register_line(struct Machine_code **node, int counter, int dest_addressing_type, int dest_register,
+void encode_register_line(struct Machine_code **node, int counter, int dest_addressing_type, int dest_register,
                          int src_addressing_type, int src_register, int funct, int attribute) {
     (*node)->position = counter;
     (*node)->is_data = 0;
@@ -178,10 +178,32 @@ int encode_register_line(struct Machine_code **node, int counter, int dest_addre
     dec_to_binary_array(attribute,              &(*node)->val[WORD_BITS + 1]);
     (*node)->next = (struct Machine_code * )malloc(sizeof (struct Machine_code));
     memset((*node)->next, 0, sizeof(struct Machine_code));
-    node = (struct Machine_code **) (*node)->next;
-    return 1;
+    *node = (*node)->next;
 }
 
+/*
+ * todo: make base_addr and offset into unsigned ints instead of regular ints.
+ * The issue right now is that our machine code structure is in regular ints.
+ * How do we convert without making it "implementation defined" ?
+ */
+void encode_base_addr_and_offset(struct Machine_code **node, int counter, int base_addr, int offset, int attribute) {
+    (*node)->position = counter;
+    (*node)->is_data = 0;
+
+    /* encode base_addr */
+    dec_to_binary_array(base_addr, (*node)->val);
+    dec_to_binary_array(attribute, &(*node)->val[WORD_BITS + 1]);
+    (*node)->next = (struct Machine_code * )malloc(sizeof (struct Machine_code));
+    memset((*node)->next, 0, sizeof(struct Machine_code));
+    *node = (*node)->next;
+
+    /* encode offset*/
+    dec_to_binary_array(offset,   (*node)->val);
+    dec_to_binary_array(attribute,&(*node)->val[WORD_BITS + 1]);
+    (*node)->next = (struct Machine_code * )malloc(sizeof (struct Machine_code));
+    memset((*node)->next, 0, sizeof(struct Machine_code));
+    *node = (*node)->next;
+}
 
 int prep_command(struct Machine_code **machine_code_node, struct Symbol_table *symbol_table_head, int *errors, char *line, int IC) {
     int num_of_operands, expected_num, L = 0, operand1_type, operand2_type;
@@ -212,19 +234,33 @@ int prep_command(struct Machine_code **machine_code_node, struct Symbol_table *s
         else if (!(strcmp(command_name, "not")));
         else if (!(strcmp(command_name, "inc"))){
             dest_addressing_type = get_addressing_method(inc_oc, analyze_operand(command_name), 0);
-            operand1++;
-            dest_register = atoi(operand1);
-            src_register = 0;
-            src_addressing_type = 0;
-            L += encode_register_line(machine_code_node, IC, dest_addressing_type, dest_register,
-                                       src_addressing_type, src_register, inc_funct, RELOCATABLE_FLAG);
             switch (dest_addressing_type){
-                case DIRECT: printf("chillin"); /*
-                case REGISTER_DIRECT, INDEXING:
-                    L += encode_base_addr();        <<<------------todo
-                    L += encode_offset();           <<<------------todo */
-            }
+                case DIRECT:
+                    encode_base_addr_and_offset(machine_code_node, IC, 0, 0, 0);
+                    L += 2;
+                    IC += 2;
+                    break;
+                case REGISTER_DIRECT:
+                    operand1++;
+                    dest_register = atoi(operand1);
+                    src_register = 0;
+                    src_addressing_type = 0;
+                    encode_register_line(machine_code_node, IC, dest_addressing_type, dest_register, src_addressing_type,
+                                              src_register, inc_funct, RELOCATABLE_FLAG);
+                    L++;
+                    IC++;
+                    break;
 
+                case INDEXING:
+                    encode_register_line(machine_code_node, IC, dest_addressing_type, dest_register, src_addressing_type,
+                                              src_register, inc_funct, RELOCATABLE_FLAG);
+                    L++;
+                    IC++;
+                    encode_base_addr_and_offset(machine_code_node, IC, 0, 0, 0);
+                    L += 2;
+                    IC += 2;
+                    break;
+            }
 
         }
         else if (!(strcmp(command_name, "dec")));
