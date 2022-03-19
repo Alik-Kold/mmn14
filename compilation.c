@@ -202,7 +202,8 @@ void compile(char* filename) {
     struct Machine_code *code_node = code_head;
     int IC = IC_INIT, DC = 0, L, errors = 0, symbol_def = 0, ICF, DCF, offset, arr_len;
     int *values;
-    char *line = (char*) malloc(LINE_MAX_LEN + 1), *label_name, *full_label_name, *string_value;
+    char *line = NULL;  //= (char*) malloc(LINE_MAX_LEN + 1),
+    char *label_name, *full_label_name, *string_value;
     size_t len;
     struct Symbol_table *head = (struct Symbol_table *) malloc(sizeof (struct Symbol_table));
     memset(head, 0, sizeof (struct Symbol_table));
@@ -292,9 +293,8 @@ void compile(char* filename) {
             IC += prep_command(&code_node, head, &errors, line, IC);
 
         }
-
+        line = NULL;
     }
-
     ICF = IC;
     DCF = DC;
     if (errors) {
@@ -310,6 +310,7 @@ void compile(char* filename) {
     fseek(fd, 0, SEEK_SET);
 
     /* 2nd pass */
+    line = NULL;
     while (getline(&line, &len, fd) != -1) {
         symbol_def = 0;
         line = trim_whitespaces(line);
@@ -339,6 +340,8 @@ void compile(char* filename) {
         /*
          * todo: finish encoding (??????????/)
          * */
+        line = NULL;
+
     }
     if (errors) return;
     create_output_files(head,code_head,filename);
