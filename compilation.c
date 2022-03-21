@@ -181,8 +181,7 @@ void compile(char* filename) {
     struct  Machine_code *code_head = (struct Machine_code *) malloc(sizeof (struct Machine_code));
     memset(code_head, 0, sizeof (struct Machine_code));
     struct Machine_code *code_node = code_head;
-    int IC = IC_INIT, DC = 0, L, errors = 0, symbol_def = 0, ICF, DCF, offset, arr_len;
-    int *values;
+    int i, IC = IC_INIT, DC = 0, L, errors = 0, symbol_def = 0, ICF, DCF, offset, arr_len, *values;
     char *line = NULL;  //= (char*) malloc(LINE_MAX_LEN + 1),
     char *label_name, *full_label_name, *string_value;
     size_t len;
@@ -243,6 +242,7 @@ void compile(char* filename) {
                     continue;
                 }
                 L = strlen(string_value);
+                /*prep_string(&code_node, &errors, string_value, &DC);*/
                 DC += L;
 
             }

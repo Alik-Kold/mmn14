@@ -9,10 +9,11 @@
 #include "structs.h"
 #include "compilation.h"
 
-void prep_command(struct Machine_code **machine_code_node, struct Symbol_table *symbol_table_head, int *errors, char *line, int * IC);
+void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_head, int *errors, char *line, int * IC);
+void prep_string(struct Machine_code **machine_code_node, int *errors, char *data, int * DC);
 int analyze_operand(char *);
 int validate_command_name(char *command_name);
-int get_addressing_method(int opcode, int operand_type, int src);
+int get_addr_type(int opcode, int operand_type, int src);
 int unexpected_instruction_error(char *instruction, int num_of_operands);
 char* get_command_name(char* line);
 void encode(struct Machine_code **node, int * counter, int start, int dest_register,

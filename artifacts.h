@@ -41,6 +41,7 @@ enum opcodes{
 };
 
 enum funct{
+    red_funct, prn_funct, mov_funct, cmp_funct, lea_funct, rts_funct, stop_funct = 0,
     add_funct = 10,
     sub_funct = 11,
     clr_funct = 10,
@@ -53,7 +54,7 @@ enum funct{
 };
 
 enum addressing{
-    IMMEDIATE       = 10,
+    IMMEDIATE       = 0,
     DIRECT          = 1,
     INDEXING        = 2,
     REGISTER_DIRECT = 3,
