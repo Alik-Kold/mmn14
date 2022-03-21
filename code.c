@@ -148,19 +148,21 @@ int get_addressing_method(int opcode, int operand_type, int src){
  * todo: make base_addr and offset into unsigned ints instead of regular ints.
  * The issue right now is that our machine code structure is in regular ints.
  * How do we convert without making it "implementation defined" ?
- * todo: implement two's complement
  */
 void encode(struct Machine_code **node, int * counter, int start, int dest_register,int src_addr_type, int src_register,
         int funct, int attribute, int is_data) {
     (*node)->position = *counter;
     (*counter)++;
     (*node)->is_data = is_data;
+
     dec_to_binary_array(dest_register, &(*node)->val[2]);
     dec_to_binary_array(src_addr_type, &(*node)->val[6]);
-    dec_to_binary_array(src_register,  &(*node)->val[8]);
-    dec_to_binary_array(funct,         &(*node)->val[12]);
-    dec_to_binary_array(attribute,     &(*node)->val[WORD_BITS + 1]);
-    dec_to_binary_array(start,          (*node)->val);
+    dec_to_binary_array(src_register, &(*node)->val[8]);
+    dec_to_binary_array(funct, &(*node)->val[12]);
+    dec_to_binary_array(attribute, &(*node)->val[WORD_BITS + 1]);
+    dec_to_binary_array(start, (*node)->val);
+    if (start < 0) handle_binary_array_of_negative(WORD_BITS, (*node)->val);
+
     (*node)->next = (struct Machine_code * )malloc(sizeof (struct Machine_code));
     memset((*node)->next, 0, sizeof(struct Machine_code));
     *node = (*node)->next;

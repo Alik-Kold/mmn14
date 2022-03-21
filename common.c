@@ -102,6 +102,20 @@ void dec_to_binary_array(int decimal_number, int result[]){
     }
 }
 
+
+/*
+ * Using 2's complement for negatives
+ * and removing minus sign
+ */
+void handle_binary_array_of_negative(int len, int result[]){
+    int i;
+    for (i = 0; i < len; i++) if (result[i]) break;
+    result[i] = 1;                          /* clearing negative */
+    for (i++; i < len; i++)
+        if (result[i] < 0) result[i] = 0;   /* clearing negative */
+        else result[i] ^= 1;
+}
+
 /*
  * Get string and delimiter
  * return string after first occurrence of delimiter
