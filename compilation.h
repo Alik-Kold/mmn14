@@ -20,6 +20,7 @@ int add_to_symbol_table(char *label_name, struct Symbol_table *head, int attr_ty
 int validate_command_name(char *command_name);
 int validate_label(char *labelname);
 int validate_registers(char* register_name);
+int update_symbol_table_attribute(struct Symbol_table *head, char *symbol, int attribute, int collision);
 int *get_data_values(char* line);
 char* get_command_name(char* line);
 
