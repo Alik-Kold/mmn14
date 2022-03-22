@@ -283,6 +283,8 @@ void compile(char* filename) {
     fseek(fd, 0, SEEK_SET);
 
     /* 2nd pass */
+    /* todo: update lucid re 2nd pass
+     */
     line = NULL;
     while (getline(&line, &len, fd) != -1) {
         symbol_def = 0;
@@ -292,16 +294,28 @@ void compile(char* filename) {
         if (label_name) continue;
 
         if (strstr(line, ".data") || strstr(line, ".string")) {
+
+            /* todo: update position in machine code -
+             *  add ICF (and maybe +1, if we're starting from 0) to current position val
+             *  */
             continue;
         } else if (strstr(line, ".extern") != NULL) {
+            /* todo: doublecheck there's nothing extra to do
+             */
             continue;
         }
         if (strstr(line, ".entry") != NULL) {
-            /*todo: something in the symbols table*/
+            /*todo: check if value is in symbols table
+             * yes - add ENTRY attribute to symbols table
+             * no - print error msg
+             * */
             continue;
         }
-        /*
-         * todo: finish encoding (??????????/)
+
+        /* parse opcode operands
+         * todo: check whether line labels are used
+         *  yes - verify labels exist, encode base_addr + offset into machine code
+         *  no - continue
          * */
         line = NULL;
 

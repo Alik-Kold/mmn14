@@ -131,7 +131,6 @@ int get_addr_type(int opcode, int operand_type, int src){
                 return -1;
         }
         return REGISTER_DIRECT;
-
     }
     return -1;
 }
@@ -142,8 +141,10 @@ int get_addr_type(int opcode, int operand_type, int src){
  * addressing word - fill in all the values
  * opcode / data / string - fill in value to start, attribute, is_data flag, and zeros for the rest
  * todo: make base_addr and offset into unsigned ints instead of regular ints.
- * The issue right now is that our machine code structure is in regular ints.
- * How do we convert without making it "implementation defined" ?
+ *  I'm not sure I understand this requirement, since the code is binary.
+ *  Is there a defacto difference in binary of signed/unsigned?
+ *  AFAIK it just uses another bit, so we implicitly handle it anyway.
+ *  Your thoughts please.
  */
 void encode(struct Machine_code **node, int * counter, int start, int dest_register,int src_addr_type, int src_register,
         int funct, int attribute, int is_data) {
@@ -195,7 +196,8 @@ void get_operand_params(int *errors, int opcode, int src, char *operand, int *ad
     }
 }
 
-void first_pass_encode_addressing(struct Machine_code **node, int *errors, int *IC, int addr_type, const char *operand) {
+
+static void first_pass_encode_addressing(struct Machine_code **node, int *errors, int *IC, int addr_type, const char *operand) {
     switch (addr_type){
         case IMMEDIATE:
             encode(node, IC, atoi(operand), 0, 0, 0, 0, ABSOLUTE_FLAG, 0);
@@ -209,6 +211,31 @@ void first_pass_encode_addressing(struct Machine_code **node, int *errors, int *
         case INDEXING:
             encode(node, IC, 0, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
             encode(node, IC, 0, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
+            break;
+        default:
+            (*errors) += unexpected_addressing_type_error(addr_type);
+            break;
+    }
+}
+
+
+static void second_pass_encode_addressing(struct Machine_code **node, int *errors, int *IC, int addr_type, const char *operand) {
+    switch (addr_type){
+        case IMMEDIATE:
+            /* todo
+             */
+            break;
+        case DIRECT:
+            /* todo
+             */
+            break;
+        case REGISTER_DIRECT:
+            /* todo
+             */
+            break;
+        case INDEXING:
+            /* todo
+             */
             break;
         default:
             (*errors) += unexpected_addressing_type_error(addr_type);

@@ -31,6 +31,9 @@ const char *ATTRIBUTES[] = {
         "DATA",
 };
 
+/*
+ * Remnants of a hopeful time
+ */
 const char *OPERAND_PATTERN[] = {
         "^[+-]?[0-9]{1,15}$",                   /* NUMBER   */
         "^[ -~]+$",                             /* STRING   */
