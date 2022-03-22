@@ -274,11 +274,12 @@ void compile(char* filename) {
         return;
     }
 
+    update_data_symbols_positions(head, ICF);
+
     print_symbol_table(head);
     printf("\n\n");
     print_machine_code(code_head);
 
-    update_data_symbols_positions(head, ICF);
     fseek(fd, 0, SEEK_SET);
 
     /* 2nd pass */
