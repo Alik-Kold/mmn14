@@ -41,7 +41,7 @@ void print_symbol_table(struct Symbol_table *head){
         node = node->next;
     }
     print_breaker();
-
+    print_pattern(3, "\n");
 }
 
 
@@ -52,6 +52,8 @@ void print_machine_code(struct Machine_code *head){
     int i;
     struct Machine_code *node = head;
 
+    print_breaker();
+    print_breaker();
     printf("position\tis_data\t\tvalues\n");
     while (node != NULL) {
         print_breaker();
@@ -61,5 +63,5 @@ void print_machine_code(struct Machine_code *head){
         node = node->next;
     }
     print_breaker();
-    print_breaker();
+    print_pattern(3, "\n");
 }

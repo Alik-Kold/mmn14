@@ -114,6 +114,36 @@ void update_data_symbols_positions(struct Symbol_table *head, int ICF){
 }
 
 
+int update_symbol_table_attribute(struct Symbol_table *head, char *symbol, int attribute, int collision){
+    struct Symbol_table *point;
+    point = head;
+    while (point) {
+        if (!strcmp(point->symbol, symbol)){
+            if (point->attribute[attribute]){
+                printf("WARNING: duplicate attributes %s for symbol %s\n", ATTRIBUTES[attribute], symbol);
+                return 0;
+            }
+            if (point->attribute[collision]){
+                printf("ERROR: attempted to colliding attribute in symbol %s\n"
+                       "%s - %s\n", point->symbol, ATTRIBUTES[collision], ATTRIBUTES[attribute]);
+                return 1;
+            }
+            point->attribute[attribute] = 1;
+            return 0;
+        }
+
+        if (point->next == NULL){
+            printf("ERROR: symbol %s not found\n", symbol);
+            return 1;
+        }
+        point = point->next;
+    }
+    printf("ERROR: no symbols found in table\n");
+    return 1;
+}
+
+
+
 /* get the values of the .data label.
  * input: entire line
  * output int* of the values*/
@@ -276,10 +306,6 @@ void compile(char* filename) {
 
     update_data_symbols_positions(head, ICF);
 
-    print_symbol_table(head);
-    printf("\n\n");
-    print_machine_code(code_head);
-
     fseek(fd, 0, SEEK_SET);
 
     /* 2nd pass */
@@ -289,9 +315,6 @@ void compile(char* filename) {
     while (getline(&line, &len, fd) != -1) {
         symbol_def = 0;
         line = trim_whitespaces(line);
-
-        label_name = get_str_upto(line, ":");
-        if (label_name) continue;
 
         if (strstr(line, ".data") || strstr(line, ".string")) {
 
@@ -304,13 +327,15 @@ void compile(char* filename) {
              */
             continue;
         }
+
         if (strstr(line, ".entry") != NULL) {
-            /*todo: check if value is in symbols table
-             * yes - add ENTRY attribute to symbols table
-             * no - print error msg
-             * */
+            label_name = trim_whitespaces(remove_head(line,".entry"));
+            errors += update_symbol_table_attribute(head, label_name, ENTRY, EXTERNAL);
             continue;
         }
+
+        label_name = get_str_upto(line, ":");
+        if (label_name) continue;
 
         /* parse opcode operands
          * todo: check whether line labels are used
@@ -320,7 +345,13 @@ void compile(char* filename) {
         line = NULL;
 
     }
+
     if (errors) return;
+
+    print_symbol_table(head);
+    printf("\n\n");
+    print_machine_code(code_head);
+
     create_output_files(head,code_head,filename);
 }
 
