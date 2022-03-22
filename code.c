@@ -216,12 +216,21 @@ void first_pass_encode_addressing(struct Machine_code **node, int *errors, int *
     }
 }
 
-/*
-void prep_string(struct Machine_code **node, int *errors, char *data, int * DC) {
- *  encode(node, IC, dest_addr_type, 0, 0, 0, 0, ABSOLUTE_FLAG, 0);
 
-    }
- */
+void prep_string(struct Machine_code **node, char *data, int *DC) {
+    int i, is_data = 1;
+    size_t len = strlen(data);
+    for (i = 0; i < len; i++)
+        encode(node, DC, data[i], 0, 0, 0, 0, ABSOLUTE_FLAG, is_data);
+    encode(node, DC, 0, 0, 0, 0, 0, ABSOLUTE_FLAG, is_data);
+}
+
+
+void prep_data(struct Machine_code **node, int *data, int *DC, int L) {
+    int i, is_data = 1;
+    for (i=0; i < L; i++)
+        encode(node, DC, data[i], 0, 0, 0, 0,ABSOLUTE_FLAG, is_data);
+}
 
 void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_head, int *errors, char *line, int * IC) {
     int num_of_operands, opcode, funct, dest_addr_type, dest_register, src_addr_type = 0, src_register = 0;
@@ -295,9 +304,3 @@ void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_
         first_pass_encode_addressing(node, errors, IC, src_addr_type, src_operand);
     first_pass_encode_addressing(node, errors, IC, dest_addr_type, dest_operand);
 }
-/*
-int prep_data(struct Machine_code **node, int *errors, char *line, int DC) {
-    int num_of_operands, expected_num, L;
-
-}
- */

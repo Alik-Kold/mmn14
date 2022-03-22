@@ -181,7 +181,7 @@ void compile(char* filename) {
     struct  Machine_code *code_head = (struct Machine_code *) malloc(sizeof (struct Machine_code));
     memset(code_head, 0, sizeof (struct Machine_code));
     struct Machine_code *code_node = code_head;
-    int i, IC = IC_INIT, DC = 0, L, errors = 0, symbol_def = 0, ICF, DCF, offset, arr_len, *values;
+    int IC = IC_INIT, DC = 0, L, errors = 0, symbol_def = 0, ICF, DCF, offset, arr_len, *values;
     char *line = NULL;  //= (char*) malloc(LINE_MAX_LEN + 1),
     char *label_name, *full_label_name, *string_value;
     size_t len;
@@ -234,31 +234,25 @@ void compile(char* filename) {
          * Handle data input
          */
         if (strstr(line, ".data") || strstr(line, ".string")) {
+            if (symbol_def) errors += add_to_symbol_table(label_name, head, DATA, DC, 0);
+
             if (strstr(line, ".string")){
-                line = remove_head(line,".string");
                 string_value = extract_string(line, "\"", "\"");
                 if (!validate_printable_only(string_value)){
                     errors++;
                     continue;
                 }
-                L = strlen(string_value);
-                /*prep_string(&code_node, &errors, string_value, &DC);*/
-                DC += L;
-
+                prep_string(&code_node, string_value, &DC);
             }
             else if (strstr(line, ".data")) {
+                line = trim_whitespaces(remove_head(line, " "));
+
+                if (!line) continue;
+
                 L = count_occurrences(line, ',') + 1;
                 values = get_data_values(line);
-                DC += L;
+                prep_data(&code_node, values, &DC, L);
             }
-            if (symbol_def) {
-                /*printf("%s\n", label_name);*/
-                errors += add_to_symbol_table(label_name, head, DATA, DC, 0);
-                DC++;
-            }
-            /*todo : data image
-             * DC += L;
-             */
             continue;
         }
 
@@ -297,17 +291,6 @@ void compile(char* filename) {
         if (label_name) continue;
 
         if (strstr(line, ".data") || strstr(line, ".string")) {
-            if (symbol_def) errors += add_to_symbol_table(label_name, head, DATA, 0, 0); //todo: offset and baseaddr?
-            if (strstr(line, ".data") != NULL) {
-                arr_len = count_occurrences(line, ',') + 1;
-                values = get_data_values(line);
-                DC += arr_len;
-            } else {
-                line = remove_head(line,".string");
-                string_value = extract_string(line, "\"", "\"");
-                DC += strlen(string_value);
-            }
-            /*todo : data image */
             continue;
         } else if (strstr(line, ".extern") != NULL) {
             continue;

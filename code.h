@@ -10,7 +10,8 @@
 #include "compilation.h"
 
 void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_head, int *errors, char *line, int * IC);
-void prep_string(struct Machine_code **machine_code_node, int *errors, char *data, int * DC);
+void prep_string(struct Machine_code **node, char *data, int *DC);
+void prep_data(struct Machine_code **node, int *data, int *DC, int L);
 int analyze_operand(char *);
 int validate_command_name(char *command_name);
 int get_addr_type(int opcode, int operand_type, int src);
