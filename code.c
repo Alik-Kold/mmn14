@@ -354,6 +354,11 @@ void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_
                 while (symbol_table_node && strcmp(symbol_table_node->symbol,src_operand)) symbol_table_node = symbol_table_node->next;
                 encode_addressing(node, errors, IC, src_addr_type, src_operand, symbol_table_node->base_addr,
                                   symbol_table_node->offset, second_pass, symbol_table_node->attribute[EXTERNAL]);
+                if(symbol_table_node->attribute[EXTERNAL])
+                {
+                    symbol_table_node->base_addr = *IC - 2;
+                    symbol_table_node->offset = symbol_table_node->base_addr + 1;
+                }
             }
             else
                 encode_addressing(node, errors, IC, src_addr_type, src_operand, 0, 0, second_pass, 0);
@@ -375,7 +380,11 @@ void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_
             while (symbol_table_node && strcmp(symbol_table_node->symbol,dest_operand)) symbol_table_node = symbol_table_node->next;
             encode_addressing(node, errors, IC, dest_addr_type, dest_operand, symbol_table_node->base_addr,
                               symbol_table_node->offset, second_pass, symbol_table_node->attribute[EXTERNAL]);
-        }
+            if(symbol_table_node->attribute[EXTERNAL])
+            {
+                symbol_table_node->base_addr = *IC - 2;
+                symbol_table_node->offset = symbol_table_node->base_addr + 1;
+            }        }
         else
             encode_addressing(node, errors, IC, dest_addr_type, dest_operand, 0, 0, second_pass,
                               0);
