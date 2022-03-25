@@ -317,7 +317,9 @@ void compile(char* filename) {
 
     fseek(fd, 0, SEEK_SET);
 
-    IC = 0;
+    IC = IC_INIT;
+    code_node = code_head;
+    data_node = data_head;
 
 
     /* 2nd pass */
@@ -351,8 +353,7 @@ void compile(char* filename) {
         /* parse opcode operands
          *  todo alik: do exactly the same as first pass for commands, but call encode_addressing with flag second pass
          * */
-        if (label_name)
-        {
+        if (label_name){
             full_label_name = malloc(strlen(label_name) + 2);
             strcpy(full_label_name, label_name);
             strcat(full_label_name, ":");
@@ -369,16 +370,14 @@ void compile(char* filename) {
 
     code_node = code_head;
     data_node = data_head;
-    while (data_node->next)
-    {
-        data_node->position += ICF; //todo alik: make sure with vadim if this is the right place
+    while (data_node->next){
+        data_node->position += ICF;
         data_node = data_node->next;
     }
     data_node = data_head;
     while (data_node->next && data_node->next->position) data_node = data_node->next;
     data_node->next = NULL;
-    while (code_node->next && code_node->next->position)
-        code_node = code_node->next;
+    while (code_node->next && code_node->next->position) code_node = code_node->next;
     code_node->next = data_head;
 
 
