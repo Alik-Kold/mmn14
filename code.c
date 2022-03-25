@@ -197,8 +197,7 @@ void get_operand_params(int *errors, int opcode, int src, char *operand, int *ad
 }
 
 
-void promote_IC_and_node(struct Machine_code **node,int *IC)
-{
+void promote_IC_and_node(struct Machine_code **node,int *IC){
     (*IC)++;
     if ((*node)->next == NULL){
         (*node)->next = (struct Machine_code * )malloc(sizeof (struct Machine_code));
@@ -283,12 +282,12 @@ void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_
     if (num_of_operands == 0){
         if (!(strcmp(command_name, "rts"))){
             if(!second_pass)
-                encode(node, IC, rts_oc, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
+                encode(node, IC, rts_oc, 0, 0, 0, 0, ABSOLUTE_FLAG, 0);
             promote_IC_and_node(node,IC);
         }
         else if (!(strcmp(command_name, "stop"))){
             if(!second_pass)
-                encode(node, IC, stop_oc, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
+                encode(node, IC, stop_oc, 0, 0, 0, 0,  ABSOLUTE_FLAG, 0);
             promote_IC_and_node(node,IC);
         }
         else (*errors) += unexpected_instruction_error(command_name, num_of_operands);
