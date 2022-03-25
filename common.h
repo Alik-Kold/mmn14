@@ -26,5 +26,7 @@ char* get_str_upto(char* line, char* delim);
 char *trim_whitespaces(char *str);
 char *remove_head(char* str,char* delimiter);
 char *strndup(const char *, size_t);
+char bin_to_hex(int binary_number);
+
 
 #endif //PROJECT_COMMON_H

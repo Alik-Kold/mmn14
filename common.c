@@ -213,3 +213,26 @@ char* extract_string(char* str, char* delim_start, char* delim_end){
     if (start) return get_str_upto(++start, delim_end);
     return NULL;
 }
+
+char bin_to_hex(int binary_number){
+    int num = binary_number;
+    int dec_value = 0;
+
+    int base = 1;
+
+    int temp = num;
+    while (temp) {
+        int last_digit = temp % 10;
+        temp = temp / 10;
+        dec_value += last_digit * base;
+        base = base * 2;
+    }
+    if (dec_value < 10)
+    {
+        return (dec_value + 48);
+    }
+    else
+    {
+        return (dec_value + 87);
+    }
+}
