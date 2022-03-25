@@ -149,7 +149,6 @@ int get_addr_type(int opcode, int operand_type, int src){
 void encode(struct Machine_code **node, int * counter, int start, int dest_register,int src_addr_type, int src_register,
         int funct, int attribute, int is_data) {
     (*node)->position = *counter;
-    (*counter)++;
     (*node)->is_data = is_data;
 
     dec_to_binary_array(dest_register, &(*node)->val[2]);
@@ -160,9 +159,7 @@ void encode(struct Machine_code **node, int * counter, int start, int dest_regis
     dec_to_binary_array(start, (*node)->val);
     if (start < 0) handle_binary_array_of_negative(WORD_BITS, (*node)->val);
 
-    (*node)->next = (struct Machine_code * )malloc(sizeof (struct Machine_code));
-    memset((*node)->next, 0, sizeof(struct Machine_code));
-    *node = (*node)->next;
+
 }
 
 
@@ -197,20 +194,38 @@ void get_operand_params(int *errors, int opcode, int src, char *operand, int *ad
 }
 
 
-static void first_pass_encode_addressing(struct Machine_code **node, int *errors, int *IC, int addr_type, const char *operand) {
+void promote_IC_and_node(struct Machine_code **node,int *IC)
+{
+    (*IC)++;
+    (*node)->next = (struct Machine_code * )malloc(sizeof (struct Machine_code));
+    memset((*node)->next, 0, sizeof(struct Machine_code));
+    *node = (*node)->next;
+
+}
+
+static void
+encode_addressing(struct Machine_code **node, int *errors, int *IC, int addr_type, const char *operand,
+                  int baseaddr, int offset,int second_pass) {
+
     switch (addr_type){
         case IMMEDIATE:
-            encode(node, IC, atoi(operand), 0, 0, 0, 0, ABSOLUTE_FLAG, 0);
+            if(!second_pass)
+                encode(node, IC, atoi(operand), 0, 0, 0, 0, ABSOLUTE_FLAG, 0);
+            promote_IC_and_node(node,IC);
             break;
         case DIRECT:
-            encode(node, IC, 0, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
-            encode(node, IC, 0, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
+            encode(node, IC, baseaddr, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
+            promote_IC_and_node(node,IC);
+            encode(node, IC, offset, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
+            promote_IC_and_node(node,IC);
             break;
         case REGISTER_DIRECT:
             break;
         case INDEXING:
-            encode(node, IC, 0, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
-            encode(node, IC, 0, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
+            encode(node, IC, baseaddr, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
+            promote_IC_and_node(node,IC);
+            encode(node, IC, offset, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
+            promote_IC_and_node(node,IC);
             break;
         default:
             (*errors) += unexpected_addressing_type_error(addr_type);
@@ -248,20 +263,29 @@ void prep_string(struct Machine_code **node, char *data, int *DC) {
     int i, is_data = 1;
     size_t len = strlen(data);
     for (i = 0; i < len; i++)
+    {
         encode(node, DC, data[i], 0, 0, 0, 0, ABSOLUTE_FLAG, is_data);
+        promote_IC_and_node(node,DC);
+    }
     encode(node, DC, 0, 0, 0, 0, 0, ABSOLUTE_FLAG, is_data);
+    promote_IC_and_node(node,DC);
+
 }
 
 
 void prep_data(struct Machine_code **node, int *data, int *DC, int L) {
     int i, is_data = 1;
     for (i=0; i < L; i++)
+    {
         encode(node, DC, data[i], 0, 0, 0, 0,ABSOLUTE_FLAG, is_data);
+        promote_IC_and_node(node,DC);
+    }
 }
 
-void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_head, int *errors, char *line, int * IC) {
+void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_head, int *errors, char *line, int * IC,int second_pass) {
     int num_of_operands, opcode, funct, dest_addr_type, dest_register, src_addr_type = 0, src_register = 0;
     char *command_name = get_command_name(line), *dest_operand, *src_operand;
+    struct Symbol_table *symbol_table_node = symbol_table_head;
 
     if (!validate_command_name(command_name)) {
         printf("command name %s not found!\n", command_name);
@@ -280,9 +304,18 @@ void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_
 
     if (!num_of_operands){
         if (!(strcmp(command_name, "rts")))
-            encode(node, IC, rts_oc, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
+        {
+            if(!second_pass)
+                encode(node, IC, rts_oc, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
+            promote_IC_and_node(node,IC);
+        }
         else if (!(strcmp(command_name, "stop")))
-            encode(node, IC, stop_oc, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
+        {
+            if(!second_pass)
+                encode(node, IC, stop_oc, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
+            promote_IC_and_node(node,IC);
+
+        }
         else (*errors) += unexpected_instruction_error(command_name, num_of_operands);
         return;
     }
@@ -324,10 +357,51 @@ void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_
     get_operand_params(errors, opcode, 0, dest_operand, &dest_addr_type, &dest_register);
 
     /* encode opcode and addressing*/
-    encode(node, IC, opcode, 0, 0, 0, 0, ABSOLUTE_FLAG, 0);
-    encode(node, IC, dest_addr_type, dest_register, src_addr_type, src_register, funct, ABSOLUTE_FLAG, 0);
+    if(!second_pass)
+        encode(node, IC, opcode, 0, 0, 0, 0, ABSOLUTE_FLAG, 0);
+    promote_IC_and_node(node,IC);
+    if(!second_pass)
+        encode(node, IC, dest_addr_type, dest_register, src_addr_type, src_register, funct, ABSOLUTE_FLAG, 0);
+    promote_IC_and_node(node,IC);
 
+    /* ont the first iteration it will create the lines, on the second iteration it will overide them if needed*/
     if (num_of_operands == 2)
-        first_pass_encode_addressing(node, errors, IC, src_addr_type, src_operand);
-    first_pass_encode_addressing(node, errors, IC, dest_addr_type, dest_operand);
+    {
+        if(!second_pass)
+            encode_addressing(node, errors, IC, src_addr_type, src_operand, 0, 0,second_pass);
+        else
+        {
+            if(src_addr_type == DIRECT || src_addr_type == INDEXING)
+            {
+                if (src_addr_type == INDEXING)
+                    src_operand = get_str_upto(src_operand,"[");
+
+                while (symbol_table_node && strcmp(symbol_table_node->symbol,src_operand)) symbol_table_node = symbol_table_node->next;
+                encode_addressing(node, errors, IC, src_addr_type, src_operand, symbol_table_node->base_addr, symbol_table_node->offset,second_pass);
+            }
+            else
+                encode_addressing(node, errors, IC, src_addr_type, src_operand, 0, 0,second_pass);
+            //get the baseaddr and offset if label is being used, call the encode_addressing with the relevent values
+        }
+    }
+
+    symbol_table_node = symbol_table_head;
+
+    if(!second_pass)
+        encode_addressing(node, errors, IC, dest_addr_type, dest_operand, 0, 0,second_pass);
+    else
+    {
+        //get the baseaddr and offset if label is being used, call the encode_addressing with the relevent values
+        if(dest_addr_type == DIRECT || dest_addr_type == INDEXING)
+        {
+            if (dest_addr_type == INDEXING)
+                dest_operand = get_str_upto(dest_operand,"[");
+
+            while (symbol_table_node && strcmp(symbol_table_node->symbol,dest_operand)) symbol_table_node = symbol_table_node->next;
+            encode_addressing(node, errors, IC, dest_addr_type, dest_operand,symbol_table_node->base_addr, symbol_table_node->offset,second_pass);
+        }
+        else
+            encode_addressing(node, errors, IC, dest_addr_type, dest_operand, 0, 0,second_pass);
+
+    }
 }

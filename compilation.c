@@ -41,6 +41,7 @@ void create_output_files(struct Symbol_table *pTable, struct Machine_code *pCode
             group_name++;
         }
         fwrite(line, strlen(line),1,ob);
+        fwrite("\n", strlen("\n"),1,ob);
         pCode = pCode->next;
     }
 
@@ -209,6 +210,8 @@ int validate_registers(char* register_name){
 
 void compile(char* filename) {
     struct  Machine_code *code_head = (struct Machine_code *) malloc(sizeof (struct Machine_code));
+    struct  Machine_code *data_head = (struct Machine_code *) malloc(sizeof (struct Machine_code));
+    struct Machine_code *data_node = data_head;
     memset(code_head, 0, sizeof (struct Machine_code));
     struct Machine_code *code_node = code_head;
     int IC = IC_INIT, DC = 0, L, errors = 0, symbol_def = 0, ICF, DCF, offset, arr_len, *values;
@@ -272,7 +275,7 @@ void compile(char* filename) {
                     errors++;
                     continue;
                 }
-                prep_string(&code_node, string_value, &DC);
+                prep_string(&data_node, string_value, &DC);
             }
             else if (strstr(line, ".data")) {
                 line = trim_whitespaces(remove_head(line, " "));
@@ -281,7 +284,7 @@ void compile(char* filename) {
 
                 L = count_occurrences(line, ',') + 1;
                 values = get_data_values(line);
-                prep_data(&code_node, values, &DC, L);
+                prep_data(&data_node, values, &DC, L);
             }
             continue;
         }
@@ -292,7 +295,7 @@ void compile(char* filename) {
         else {
             offset = IC % WORD_BITS;
             if (symbol_def) errors += add_to_symbol_table(label_name, head, CODE, IC - offset, offset);
-            prep_command(&code_node, head, &errors, line, &IC);
+            prep_command(&code_node, head, &errors, line, &IC,0);
 
         }
         line = NULL;
@@ -308,23 +311,24 @@ void compile(char* filename) {
 
     fseek(fd, 0, SEEK_SET);
 
+    IC = 0;
+
+
     /* 2nd pass */
     /* todo: update lucid re 2nd pass
+     * todo alik: refactor so there are two machine code nodes, one pointing for the data and one pointing
+     * for the instrctions. once finished first pass, append ICF to DC and make the last node of the
+     * machine code point to the first node of the data node and the we can skip all .entry .extern and only care about commands
      */
     line = NULL;
     while (getline(&line, &len, fd) != -1) {
         symbol_def = 0;
         line = trim_whitespaces(line);
+        if(strlen(line) < 2 || line[0] == ';') continue;
 
         if (strstr(line, ".data") || strstr(line, ".string")) {
-
-            /* todo: update position in machine code -
-             *  add ICF (and maybe +1, if we're starting from 0) to current position val
-             *  */
             continue;
         } else if (strstr(line, ".extern") != NULL) {
-            /* todo: doublecheck there's nothing extra to do
-             */
             continue;
         }
 
@@ -335,16 +339,41 @@ void compile(char* filename) {
         }
 
         label_name = get_str_upto(line, ":");
-        if (label_name) continue;
 
+
+        // todo alik: remove the head of the label
         /* parse opcode operands
-         * todo: check whether line labels are used
-         *  yes - verify labels exist, encode base_addr + offset into machine code
-         *  no - continue
+         *  todo alik: do exactly the same as first pass for commands, but call encode_addressing with flag second pass
          * */
+        if (label_name)
+        {
+            full_label_name = malloc(strlen(label_name) + 2);
+            strcpy(full_label_name, label_name);
+            strcat(full_label_name, ":");
+            line = remove_head(line,full_label_name);
+            line = trim_whitespaces(line);
+
+        }
+
+        prep_command(&code_node, head, &errors, line, &IC,1);
+
         line = NULL;
 
     }
+
+    code_node = code_head;
+    data_node = data_head;
+    while (data_node->next)
+    {
+        data_node->position += ICF; //todo alik: make sure with vadim if this is the right place
+        data_node = data_node->next;
+    }
+    data_node = data_head;
+    while (data_node->next && data_node->next->position) data_node = data_node->next;
+    data_node->next = NULL;
+    while (code_node->next && code_node->next->position)
+        code_node = code_node->next;
+    code_node->next = data_head;
 
     if (errors) return;
 
