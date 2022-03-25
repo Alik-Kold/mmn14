@@ -69,19 +69,21 @@ enum attributes{
 
 enum operand_types{
     NUMBER          = 0,
-    STRING          = 1,
     LABEL           = 2,
     REGISTER        = 3,
-    INDEX           = 4,
     INDEX_NUMBER    = 5,
     INDEX_LABEL     = 6,
     INDEX_REGISTER  = 7,
 };
 
+/*
+ * ARE flag values are multiples of two,
+ * in order to only toggle the appropriate bit during encoding
+ */
 enum are_flags{
     ABSOLUTE_FLAG    = 1,
     RELOCATABLE_FLAG = 2,
-    EXTERNAL_FLAG    = 3,
+    EXTERNAL_FLAG    = 4,
 };
 
 #endif //PROJECT_ARTIFACTS_H
