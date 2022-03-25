@@ -227,9 +227,11 @@ void compile(char* filename) {
     struct Symbol_table *head = (struct Symbol_table *) malloc(sizeof (struct Symbol_table));
     memset(head, 0, sizeof (struct Symbol_table));
     struct Symbol_table *point = head;
+    char* am_filename;
+    set_file_extention(filename,&am_filename,".am");
 
 
-    FILE *fd = fopen(filename, "r");
+    FILE *fd = fopen(am_filename, "r");
 
     /* 1st pass */
     while (getline(&line, &len, fd) != -1) {

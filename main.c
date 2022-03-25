@@ -8,7 +8,6 @@
 
 int main(int argc, char *argv[]) {
     int i = 1;
-    char *am_file_name;
     for (; i < argc; i++){
         /*
             if (!extract_macros(argv[i])){
@@ -17,8 +16,7 @@ int main(int argc, char *argv[]) {
                 continue;
             }
         */
-        set_file_extention(argv[i],&am_file_name,".am");
-        compile(am_file_name);
+        compile(argv[i]);
     }
     printf("\ndone\n");
     return EXIT_SUCCESS;
