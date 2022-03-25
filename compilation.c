@@ -286,7 +286,7 @@ void compile(char* filename) {
                 prep_string(&data_node, string_value, &DC);
             }
             else if (strstr(line, ".data")) {
-                line = trim_whitespaces(remove_head(line, " "));
+                line = trim_whitespaces(line);
 
                 if (!line) continue;
 
