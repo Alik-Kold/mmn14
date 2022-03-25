@@ -149,10 +149,13 @@ int get_addr_type(int opcode, int operand_type, int src){
  */
 void encode(struct Machine_code **node, int * counter, int start, int dest_register,int src_addr_type, int src_register,
         int funct, int attribute, int is_data) {
+    int i = 0;
     (*node)->position = *counter;
     (*node)->is_data = is_data;
 
-    memset((*node)->val,0,20);
+
+    for (; i < 20 ; i ++)
+        (*node)->val[i] = 0;
     dec_to_binary_array(dest_register, &(*node)->val[2]);
     dec_to_binary_array(src_addr_type, &(*node)->val[6]);
     dec_to_binary_array(src_register, &(*node)->val[8]);
