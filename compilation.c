@@ -1,7 +1,7 @@
 #include "compilation.h"
 
 
-void create_output_files(struct Symbol_table *pTable, struct Machine_code *pCode,char* filename) {
+void create_output_files(struct Symbol_table *pTable, struct Machine_code *pCode,char* filename,int ICF, int DCF) {
     char *ext_file_name, *ent_file_name, *ob_file_name, line[80], group_name = 'A';
     set_file_extention(filename,&ext_file_name,".ext");
     set_file_extention(filename,&ent_file_name,".ent");
@@ -11,6 +11,12 @@ void create_output_files(struct Symbol_table *pTable, struct Machine_code *pCode
     FILE* ext = fopen(ext_file_name,"w");
     FILE* ent = fopen(ent_file_name,"w");
     FILE* ob = fopen(ob_file_name,"w");
+    char head_title[80];
+
+    sprintf(head_title,"%d %d \n",ICF - IC_INIT , DCF);
+
+    fwrite(head_title,strlen(head_title),1,ob);
+
     int number, i =0;
     char ascii_value;
     int DC = 100;
@@ -392,7 +398,7 @@ void compile(char* filename) {
     print_machine_code(data_head);
 
     if (errors) return;
-    create_output_files(head,code_head,filename);
+    create_output_files(head,code_head,filename,ICF,DCF);
 }
 
 
