@@ -218,6 +218,7 @@ void compile(char* filename) {
     struct  Machine_code *data_head = (struct Machine_code *) malloc(sizeof (struct Machine_code));
     struct Machine_code *data_node = data_head;
     memset(code_head, 0, sizeof (struct Machine_code));
+    memset(data_head, 0, sizeof (struct Machine_code));
     struct Machine_code *code_node = code_head;
     int IC = IC_INIT, DC = 0, L, errors = 0, symbol_def = 0, ICF, DCF, offset, arr_len, *values;
     char *line = NULL;  //= (char*) malloc(LINE_MAX_LEN + 1),
@@ -380,12 +381,16 @@ void compile(char* filename) {
         code_node = code_node->next;
     code_node->next = data_head;
 
-    if (errors) return;
 
     print_symbol_table(head);
     printf("\n\n");
+    printf("printf instruction machine code:\n");
     print_machine_code(code_head);
 
+    printf("printf data machine code:\n");
+    print_machine_code(data_head);
+
+    if (errors) return;
     create_output_files(head,code_head,filename);
 }
 

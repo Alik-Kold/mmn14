@@ -140,6 +140,7 @@ int get_addr_type(int opcode, int operand_type, int src){
  * encode values into binary
  * addressing word - fill in all the values
  * opcode / data / string - fill in value to start, attribute, is_data flag, and zeros for the rest
+ * note - "start" for addressing line is dest_addr_type
  * todo: make base_addr and offset into unsigned ints instead of regular ints.
  *  I'm not sure I understand this requirement, since the code is binary.
  *  Is there a defacto difference in binary of signed/unsigned?
@@ -262,8 +263,7 @@ static void second_pass_encode_addressing(struct Machine_code **node, int *error
 void prep_string(struct Machine_code **node, char *data, int *DC) {
     int i, is_data = 1;
     size_t len = strlen(data);
-    for (i = 0; i < len; i++)
-    {
+    for (i = 0; i < len; i++){
         encode(node, DC, data[i], 0, 0, 0, 0, ABSOLUTE_FLAG, is_data);
         promote_IC_and_node(node,DC);
     }
@@ -283,7 +283,7 @@ void prep_data(struct Machine_code **node, int *data, int *DC, int L) {
 }
 
 void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_head, int *errors, char *line, int * IC,int second_pass) {
-    int num_of_operands, opcode, funct, dest_addr_type, dest_register, src_addr_type = 0, src_register = 0;
+    int num_of_operands, opcode, funct, dest_addr_type, dest_register = 0, src_addr_type = 0, src_register = 0;
     char *command_name = get_command_name(line), *dest_operand, *src_operand;
     struct Symbol_table *symbol_table_node = symbol_table_head;
 

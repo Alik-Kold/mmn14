@@ -4,7 +4,7 @@
 static void print_pattern(unsigned int i, char * str){while(i--) printf("%s", str);}
 
 static void print_breaker(){
-    print_pattern(50, "-");
+    print_pattern(40, "-");
     printf("\n");
 }
 
@@ -57,7 +57,7 @@ void print_machine_code(struct Machine_code *head){
     printf("position\tis_data\t\tvalues\n");
     while (node != NULL) {
         print_breaker();
-        printf("%d\t\t%d\t\t",node->position, node->is_data);
+        printf("%d\t\t\t%d\t\t",node->position, node->is_data);
         for (i=0; i < 1 + ARE_BITS_LEN + WORD_BITS; i++) printf("%d", node->val[i]);
         printf("\n");
         node = node->next;

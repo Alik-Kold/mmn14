@@ -79,9 +79,9 @@ enum operand_types{
 };
 
 enum are_flags{
-    ABSOLUTE_FLAG    = 0,
-    RELOCATABLE_FLAG = 1,
-    EXTERNAL_FLAG    = 2,
+    ABSOLUTE_FLAG    = 1,
+    RELOCATABLE_FLAG = 2,
+    EXTERNAL_FLAG    = 3,
 };
 
 #endif //PROJECT_ARTIFACTS_H

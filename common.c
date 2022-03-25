@@ -96,7 +96,7 @@ int bin_to_decimal(int binary_number){
 
 void dec_to_binary_array(int decimal_number, int result[]){
     int i = 0;
-    while (decimal_number){
+    while (decimal_number && i <= WORD_BITS){
         result[i++] = decimal_number % 2;
         decimal_number /= 2;
     }
