@@ -395,9 +395,6 @@ void compile(char* filename) {
     printf("printf instruction machine code:\n");
     print_machine_code(code_head);
 
-    printf("printf data machine code:\n");
-    print_machine_code(data_head);
-
     if (errors) return;
     create_output_files(head,code_head,filename,ICF,DCF);
 }

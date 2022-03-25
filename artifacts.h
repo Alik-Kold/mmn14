@@ -41,7 +41,13 @@ enum opcodes{
 };
 
 enum funct{
-    red_funct, prn_funct, mov_funct, cmp_funct, lea_funct, rts_funct, stop_funct = 0,
+    red_funct = 0,
+    prn_funct = 0,
+    mov_funct = 0,
+    cmp_funct = 0,
+    lea_funct = 0,
+    rts_funct = 0,
+    stop_funct = 0,
     add_funct = 10,
     sub_funct = 11,
     clr_funct = 10,

@@ -152,6 +152,7 @@ void encode(struct Machine_code **node, int * counter, int start, int dest_regis
     (*node)->position = *counter;
     (*node)->is_data = is_data;
 
+    memset((*node)->val,0,20);
     dec_to_binary_array(dest_register, &(*node)->val[2]);
     dec_to_binary_array(src_addr_type, &(*node)->val[6]);
     dec_to_binary_array(src_register, &(*node)->val[8]);
@@ -203,16 +204,15 @@ void promote_IC_and_node(struct Machine_code **node,int *IC)
     *node = (*node)->next;
 }
 
-static void
-encode_addressing(struct Machine_code **node, int *errors, int *IC, int addr_type, const char *operand, int base_addr,
-                  int offset, int second_pass, int attribute) {
+static void encode_addressing(struct Machine_code **node, int *errors, int *IC, int addr_type, const char *operand,
+                              int base_addr, int offset, int second_pass, int attribute) {
     if (attribute) attribute = EXTERNAL_FLAG;
     else attribute = RELOCATABLE_FLAG;
 
     switch (addr_type){
         case IMMEDIATE:
             if(!second_pass)
-                encode(node, IC, atoi(operand), 0, 0, 0, 0, ABSOLUTE_FLAG, 0);
+                encode(node, IC, atoi(++operand), 0, 0, 0, 0, ABSOLUTE_FLAG, 0);
             promote_IC_and_node(node,IC);
             break;
         case DIRECT:
@@ -245,7 +245,6 @@ void prep_string(struct Machine_code **node, char *data, int *DC) {
     }
     encode(node, DC, 0, 0, 0, 0, 0, ABSOLUTE_FLAG, is_data);
     promote_IC_and_node(node,DC);
-
 }
 
 
@@ -265,7 +264,7 @@ void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_
 
     if (!validate_command_name(command_name)) {
         printf("command name %s not found!\n", command_name);
-        errors++;
+        (*errors)++;
     }
 
     line = trim_whitespaces(remove_head(line, command_name));
@@ -278,19 +277,16 @@ void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_
         return;
     }
 
-    if (!num_of_operands){
-        if (!(strcmp(command_name, "rts")))
-        {
+    if (num_of_operands == 0){
+        if (!(strcmp(command_name, "rts"))){
             if(!second_pass)
                 encode(node, IC, rts_oc, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
             promote_IC_and_node(node,IC);
         }
-        else if (!(strcmp(command_name, "stop")))
-        {
+        else if (!(strcmp(command_name, "stop"))){
             if(!second_pass)
                 encode(node, IC, stop_oc, 0, 0, 0, 0, RELOCATABLE_FLAG, 0);
             promote_IC_and_node(node,IC);
-
         }
         else (*errors) += unexpected_instruction_error(command_name, num_of_operands);
         return;
@@ -298,6 +294,8 @@ void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_
 
     if (num_of_operands == 1){
         dest_operand = trim_whitespaces(get_operand(line));
+        src_operand = 0;
+        src_addr_type = 0;
         if (!(strcmp(command_name, "clr")))      opcode = clr_oc, funct = clr_funct;
         else if (!(strcmp(command_name, "not"))) opcode = not_oc, funct = not_funct;
         else if (!(strcmp(command_name, "inc"))) opcode = inc_oc, funct = inc_funct;
@@ -350,13 +348,14 @@ void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_
                     src_operand = get_str_upto(src_operand,"[");
 
                 while (symbol_table_node && strcmp(symbol_table_node->symbol,src_operand)) symbol_table_node = symbol_table_node->next;
-                encode_addressing(node, errors, IC, src_addr_type, src_operand, symbol_table_node->base_addr,
-                                  symbol_table_node->offset, second_pass, symbol_table_node->attribute[EXTERNAL]);
-                if(symbol_table_node->attribute[EXTERNAL])
-                {
+                if(symbol_table_node->attribute[EXTERNAL]){
+                    encode_addressing(node, errors, IC, src_addr_type, 0, 0,0, second_pass, 1);
                     symbol_table_node->base_addr = *IC - 2;
                     symbol_table_node->offset = symbol_table_node->base_addr + 1;
                 }
+                else
+                    encode_addressing(node, errors, IC, src_addr_type, src_operand, symbol_table_node->base_addr,
+                                      symbol_table_node->offset, second_pass, 0);
             }
             else
                 encode_addressing(node, errors, IC, src_addr_type, src_operand, 0, 0, second_pass, 0);
@@ -368,21 +367,22 @@ void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_
 
     if(!second_pass)
         encode_addressing(node, errors, IC, dest_addr_type, dest_operand, 0, 0, second_pass, 0);
-    else
-    {
+    else{
         //get the baseaddr and offset if label is being used, call the encode_addressing with the relevent values
         if(dest_addr_type == DIRECT || dest_addr_type == INDEXING){
             if (dest_addr_type == INDEXING)
                 dest_operand = get_str_upto(dest_operand,"[");
 
             while (symbol_table_node && strcmp(symbol_table_node->symbol,dest_operand)) symbol_table_node = symbol_table_node->next;
-            encode_addressing(node, errors, IC, dest_addr_type, dest_operand, symbol_table_node->base_addr,
-                              symbol_table_node->offset, second_pass, symbol_table_node->attribute[EXTERNAL]);
-            if(symbol_table_node->attribute[EXTERNAL])
-            {
+            if(symbol_table_node->attribute[EXTERNAL]){
+                encode_addressing(node, errors, IC, dest_addr_type, 0, 0,0, second_pass, 1);
                 symbol_table_node->base_addr = *IC - 2;
                 symbol_table_node->offset = symbol_table_node->base_addr + 1;
-            }        }
+            }
+            else
+                encode_addressing(node, errors, IC, dest_addr_type, dest_operand, symbol_table_node->base_addr,
+                                  symbol_table_node->offset, second_pass, 0);
+        }
         else
             encode_addressing(node, errors, IC, dest_addr_type, dest_operand, 0, 0, second_pass,
                               0);
