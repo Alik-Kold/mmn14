@@ -22,22 +22,22 @@ extern const char *ATTRIBUTES[];
 extern const char *OPERAND_PATTERN[];
 
 enum opcodes{
-    mov_oc = 0,
-    cmp_oc = 1,
-    add_oc = 2,
-    sub_oc = 2,
-    lea_oc = 4,
-    clr_oc = 5,
-    not_oc = 5,
-    inc_oc = 5,
-    dec_oc = 5,
-    jmp_oc = 9,
-    bne_oc = 9,
-    jsr_oc = 9,
-    red_oc = 12,
-    prn_oc = 13,
-    rts_oc = 14,
-    stop_oc = 15
+    mov_oc = 1, // 0
+    cmp_oc = 2, // 1
+    add_oc = 4,
+    sub_oc = 4, // 2
+    lea_oc = 16, // 4
+    clr_oc = 32,
+    not_oc = 32,
+    inc_oc = 32,
+    dec_oc = 32, // 5
+    jmp_oc = 512,
+    bne_oc = 512,
+    jsr_oc = 512, // 9
+    red_oc = 4096, // 12
+    prn_oc = 8192, //13
+    rts_oc = 16384, // 14
+    stop_oc = 32768, // 15
 };
 
 enum funct{
@@ -81,9 +81,9 @@ enum operand_types{
  * in order to only toggle the appropriate bit during encoding
  */
 enum are_flags{
-    ABSOLUTE_FLAG    = 1,
+    ABSOLUTE_FLAG    = 4,
     RELOCATABLE_FLAG = 2,
-    EXTERNAL_FLAG    = 4,
+    EXTERNAL_FLAG    = 1,
 };
 
 #endif //PROJECT_ARTIFACTS_H

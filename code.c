@@ -159,8 +159,6 @@ void encode(struct Machine_code **node, int * counter, int start, int dest_regis
     dec_to_binary_array(attribute, &(*node)->val[WORD_BITS]);
     dec_to_binary_array(start, (*node)->val);
     if (start < 0) handle_binary_array_of_negative(WORD_BITS, (*node)->val);
-
-
 }
 
 

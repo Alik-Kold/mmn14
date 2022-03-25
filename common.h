@@ -13,6 +13,7 @@
 void dec_to_binary_array(int decimal_number, int result[]);
 void handle_binary_array_of_negative(int len, int result[]);
 void set_file_extention(char* filename,char** dest_pointer,const char* ext);
+void reverse_array(int arr[], int size);
 void write_line_to_file(const char *, FILE *);
 int bin_to_decimal(int binary_number);
 int count_occurrences(char* str, char char_);

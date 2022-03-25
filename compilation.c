@@ -38,6 +38,7 @@ void create_output_files(struct Symbol_table *pTable, struct Machine_code *pCode
 
     while(pCode) {
         group_name = 'A';
+        reverse_array(pCode->val, 20);
         for (i = 0; i < 5 ; i++){
             //i - i+4
             number = pCode->val[i * 4] * 1000 + pCode->val[i*4 + 1] * 100 + pCode->val[i*4 + 2] * 10 + pCode->val[i*4 + 3] * 1;

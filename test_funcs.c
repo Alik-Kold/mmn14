@@ -58,7 +58,7 @@ void print_machine_code(struct Machine_code *head){
     while (node != NULL) {
         print_breaker();
         printf("%d\t\t\t%d\t\t",node->position, node->is_data);
-        for (i=0; i < 1 + ARE_BITS_LEN + WORD_BITS; i++) printf("%d", node->val[i]);
+        for (i=ARE_BITS_LEN + WORD_BITS; i >= 0 ; i--) printf("%d", node->val[i]);
         printf("\n");
         node = node->next;
     }
