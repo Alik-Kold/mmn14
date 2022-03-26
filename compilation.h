@@ -22,6 +22,6 @@ int validate_label(char *labelname);
 int validate_registers(char* register_name);
 int update_symbol_table_attribute(struct Symbol_table *head, char *symbol, int attribute, int collision);
 int *get_data_values(char* line);
-char* get_command_name(char* line);
+char *get_word(char *line, char *delim);
 
 #endif //PROJECT_COMPILATION_H

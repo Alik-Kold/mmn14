@@ -206,7 +206,6 @@ int line_is_too_long(const char *line) {
     return 0;
 }
 
-
 char* get_str_upto(char* line, char* delim){
     size_t len = strcspn(line, delim);
     if (len && len < strlen(line)) return strndup(line, len);
@@ -233,12 +232,13 @@ char bin_to_hex(int binary_number){
         dec_value += last_digit * base;
         base = base * 2;
     }
-    if (dec_value < 10)
-    {
-        return (dec_value + 48);
-    }
-    else
-    {
-        return (dec_value + 87);
-    }
+    if (dec_value < 10) return (dec_value + 48);
+    else                return (dec_value + 87);
 }
+
+
+char *get_word(char *line, char *delim) {
+    char* str = strdup(line);
+    return strtok(str, delim);
+}
+

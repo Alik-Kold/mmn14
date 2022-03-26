@@ -14,17 +14,6 @@ int validate_command_name(char *command_name){
 }
 
 
-char* get_command_name(char* line){
-    char* str = strdup(line);
-    return strtok(str, " ");
-}
-
-char* get_operand(char* line){
-    char* str = strdup(line);
-    return strtok(str, ",");
-}
-
-
 /*
  * receive operand string str
  * return operand type enum
@@ -254,7 +243,7 @@ void prep_data(struct Machine_code **node, int *data, int *DC, int L) {
 
 void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_head, int *errors, char *line, int * IC,int second_pass) {
     int num_of_operands, opcode, funct, dest_addr_type, dest_register = 0, src_addr_type = 0, src_register = 0, attribute;
-    char *command_name = get_command_name(line), *dest_operand, *src_operand;
+    char *command_name = get_word(line, " "), *dest_operand, *src_operand;
     struct Symbol_table *symbol_table_node = symbol_table_head;
 
     if (!validate_command_name(command_name)) {
@@ -288,7 +277,7 @@ void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_
     }
 
     if (num_of_operands == 1){
-        dest_operand = trim_whitespaces(get_operand(line));
+        dest_operand = trim_whitespaces(get_word(line, ","));
         src_operand = 0;
         src_addr_type = 0;
         if (!(strcmp(command_name, "clr")))      opcode = clr_oc, funct = clr_funct;
@@ -307,7 +296,7 @@ void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_
     }
 
     if (num_of_operands == 2){
-        src_operand = trim_whitespaces(get_operand(line));
+        src_operand = trim_whitespaces(get_word(line, ","));
         dest_operand = strstr(line, ",");
         dest_operand++; /* ugly hack to get rid of the comma*/
         dest_operand = trim_whitespaces(dest_operand);
