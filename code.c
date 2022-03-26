@@ -123,11 +123,6 @@ int get_addr_type(int opcode, int operand_type, int src){
  * addressing word - fill in all the values
  * opcode / data / string - fill in value to start, attribute, is_data flag, and zeros for the rest
  * note - "start" for addressing line is dest_addr_type
- * todo: make base_addr and offset into unsigned ints instead of regular ints.
- *  I'm not sure I understand this requirement, since the code is binary.
- *  Is there a defacto difference in binary of signed/unsigned?
- *  AFAIK it just uses another bit, so we implicitly handle it anyway.
- *  Your thoughts please.
  */
 void encode(struct Machine_code **node, int * counter, int start, int dest_register,int src_addr_type, int src_register,
         int funct, int attribute, int is_data) {

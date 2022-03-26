@@ -206,9 +206,6 @@ char* extract_string(char* str, char* delim_start, char* delim_end){
     return NULL;
 }
 
-/*
- * todo: figure out last two lines - how to improve?
- */
 char bin_to_hex(int binary_number){
     int num = binary_number;
     int dec_value = 0;
