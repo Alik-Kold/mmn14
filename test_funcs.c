@@ -2,7 +2,8 @@
 
 
 /*
- * Print out all values in Symbol_table
+ * Print out contents of Symbol_table
+ * @params head - ptr to the symbol table head
  * */
 void print_symbol_table(struct Symbol_table *head){
     int i;
@@ -32,7 +33,8 @@ void print_symbol_table(struct Symbol_table *head){
 
 
 /*
- * Print out all the encodings
+ * Print out contents of machine_code
+ * @params head - ptr to the command machine code table head
  * */
 void print_machine_code(struct Machine_code *head){
     int i;

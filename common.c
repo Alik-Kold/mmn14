@@ -212,11 +212,7 @@ char* extract_string(char* str, char* delim_start, char* delim_end){
 
 
 char bin_to_hex(int binary_number){
-    int num = binary_number;
-    int dec_value = 0;
-
-    int base = 1;
-
+    int base = 1, dec_value = 0, num = binary_number;
     int temp = num;
     while (temp) {
         int last_digit = temp % 10;

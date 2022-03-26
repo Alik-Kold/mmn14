@@ -1,3 +1,6 @@
+/*
+ * Precompilation module
+ */
 #ifndef PROJECT_PRECOMPILATION_H
 #define PROJECT_PRECOMPILATION_H
 
@@ -7,10 +10,8 @@
 #include "artifacts.h"
 #include "common.h"
 #include "structs.h"
+#include "compilation.h"
 
-
-int validate_macro_name(char* labelname);
 int extract_macros(char * filename);
-
 
 #endif

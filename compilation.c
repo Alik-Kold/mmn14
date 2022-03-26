@@ -1,18 +1,27 @@
 #include "compilation.h"
 
+
 /*
  * Validate label isn't a duplicate or a reserved word
- * @param labelname - the current str to validate
+ * @param str - the current str to validate
  * @return 1 if bad, 0 otherwise
  */
-int validate_label(char *labelname){
+int validate_label(char *str){
     int i;
-    for(i = 0; i < LEN_COMMANDS;     i++)   if (strcmp(labelname,COMMANDS[i]) == 0)     return 1;
-    for(i = 0; i < LEN_INSTRUCTIONS; i++)   if (strcmp(labelname,INSTRUCTIONS[i]) == 0) return 1;
+    for(i = 0; i < LEN_COMMANDS;     i++)   if (strcmp(str, COMMANDS[i]) == 0)     return 1;
+    for(i = 0; i < LEN_INSTRUCTIONS; i++)   if (strcmp(str, INSTRUCTIONS[i]) == 0) return 1;
     return 0;
 }
 
-
+/*
+ * Add label to symbol table
+ * @param label_name - label to be added
+ * @param head - ptr to head of the symbol table
+ * @param attr_type - attribute to add
+ * @param base_addr - label base address
+ * @param offset - label offset
+ * @return whether there was an addition error
+ */
 int add_to_symbol_table(char *label_name, struct Symbol_table *head, int attr_type, int base_addr, int offset) {
     int errors = 0;
     struct Symbol_table *point, *new_node;
@@ -47,7 +56,11 @@ int add_to_symbol_table(char *label_name, struct Symbol_table *head, int attr_ty
     return errors;
 }
 
-
+/*
+ * Add ICF to all data point positions after 1st pass
+ * @param head - ptr to head of the symbol table
+ * @param ICF - total number of commands (the value to add)
+ */
 void update_data_symbols_positions(struct Symbol_table *head, int ICF){
     struct Symbol_table *point;
     point = head;
@@ -63,7 +76,15 @@ void update_data_symbols_positions(struct Symbol_table *head, int ICF){
     }
 }
 
-
+/*
+ * Add attribute to a label in the symbol table
+ * @param head - ptr to head of the symbol table
+ * @param symbol - the label
+ * @parm attribute - the attribute  (should only be entry in this project, but we figured we make it generic)
+ * @parm collision - a collision attribute to compare against
+ *                                  (should only be external in this project, but we figured we make it generic)
+ * @return how many addition errors there were
+ */
 int update_symbol_table_attribute(struct Symbol_table *head, char *symbol, int attribute, int collision){
     struct Symbol_table *point;
     point = head;
@@ -82,7 +103,7 @@ int update_symbol_table_attribute(struct Symbol_table *head, char *symbol, int a
             return 0;
         }
 
-        if (point->next == NULL){
+        if (!point->next){
             printf("ERROR: symbol %s not found\n", symbol);
             return 1;
         }
@@ -93,10 +114,10 @@ int update_symbol_table_attribute(struct Symbol_table *head, char *symbol, int a
 }
 
 
-
 /* get the values of the .data label.
- * input: entire line
- * output int* of the values*/
+ * @param line - string of comma seperated integer values
+ * @return ptr to integer array of these values
+ */
 int *get_data_values(char* line){
     char* number_str = remove_head(line, ".data");
     int* numbers;
@@ -147,6 +168,8 @@ int *get_data_values(char* line){
 
 /*
  * Validate register is between r10 and r15
+ * @param register_name
+ * @return 1 if valid, else 0
  * */
 int validate_registers(char* register_name){
     int num;
@@ -163,7 +186,15 @@ int validate_registers(char* register_name){
     return ((num >= 10) && (num <= 15));
 }
 
-
+/*
+ * Main project flow
+ * Includes:
+ *  - 1st pass
+ *  - 2nd pass
+ *  - entry point to write_files
+ *
+ * @param filename - path to file to read from, without file suffix
+ */
 void compile(char* filename) {
     struct Machine_code *code_head, *data_head, *data_node, *code_node;
     struct Symbol_table *head;
@@ -277,14 +308,16 @@ void compile(char* filename) {
 
     update_data_symbols_positions(head, ICF);
 
+    /*
+     * 2nd pass staging
+     */
     fseek(fd, 0, SEEK_SET);
-
     IC = IC_INIT;
     code_node = code_head;
     data_node = data_head;
+    read_line = NULL;
 
     /* 2nd pass */
-    read_line = NULL;
     while (getline(&read_line, &len, fd) != -1) {
         line = trim_whitespaces(read_line);
         if(strlen(line) < 2 || line[0] == ';') continue;
@@ -321,12 +354,18 @@ void compile(char* filename) {
     while (code_node->next && code_node->next->position) code_node = code_node->next;
     code_node->next = data_head;
 
-
+/*
+ * Debugging printouts of symbol table and machine code before writing them to file
+ * We weren't sure how you'd feel about adding support to debug flags (out os scope for this project)
+ * So we're just commenting these out.
+ * Please uncomment, recompile and run to behold their glorious sight
+ */
+/*
     print_symbol_table(head);
     print_pattern(2, "\n");
     printf("printf instruction machine code:\n");
     print_machine_code(code_head);
-
+*/
     if (errors) return;
     create_output_files(head,code_head,filename,ICF,DCF);
 }

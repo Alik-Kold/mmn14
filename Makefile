@@ -26,7 +26,7 @@ code.o: artifacts.h code.h code.c common.h compilation.h structs.h test_funcs.h
 
 	$(CREATE_O) code.c -o code.o
 
-file_writes.o: artifacts.h code.h file_writes.c common.h compilation.h precompilation.h structs.h test_funcs.h
+file_writes.o: artifacts.h file_writes.c common.h compilation.h precompilation.h structs.h test_funcs.h
 
 	$(CREATE_O) file_writes.c -o file_writes.o
 
@@ -48,4 +48,4 @@ common.o: artifacts.h common.c common.h
 
 clean:
 
-	$(RM) assembler *.o *~%
+	$(RM) *.o *~%

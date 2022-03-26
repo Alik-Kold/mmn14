@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "artifacts.h"
-#include "code.h"
 #include "common.h"
 #include "structs.h"
 #include "test_funcs.h"
