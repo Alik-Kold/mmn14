@@ -1,3 +1,5 @@
+
+# Compilation flag Macros
 CC = gcc
 CREATE_BIN = $(CC) -g -ansi -pedantic -Wall
 CREATE_O = $(CC) -c
