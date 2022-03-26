@@ -13,7 +13,7 @@ void print_symbol_table(struct Symbol_table *head){
     print_breaker();
     print_breaker();
     while (node) {
-        if (max_len < strlen(node->symbol)) max_len = strlen(node->symbol);
+        if (node->symbol && max_len < strlen(node->symbol)) max_len = strlen(node->symbol);
         node = node->next;
     }
     print_str_with_padding(max_len, "label");
