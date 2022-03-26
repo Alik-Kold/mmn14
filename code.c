@@ -45,7 +45,7 @@ int analyze_operand(char* operand){
         while(str[0] != 0){
             if (str_len > LABEL_MAX_LEN - 1){
                 printf("Label %s too long!\n"
-                       "Label length - %lu\n"
+                       "Label length - %u\n"
                        "Allowed - %d", operand, strlen(operand), LABEL_MAX_LEN);
                 return -1;
             }
@@ -190,20 +190,18 @@ void promote_IC_and_node(struct Machine_code **node,int *IC){
 
 static void encode_addressing(struct Machine_code **node, int *errors, int *IC, int addr_type, const char *operand,
                               int base_addr, int offset, int second_pass, int attribute) {
-    if (attribute) attribute = EXTERNAL_FLAG;
-    else attribute = RELOCATABLE_FLAG;
+    attribute = (attribute) ? EXTERNAL_FLAG : RELOCATABLE_FLAG;
 
     switch (addr_type){
         case IMMEDIATE:
-            if(!second_pass)
-                encode(node, IC, atoi(++operand), 0, 0, 0, 0, ABSOLUTE_FLAG, 0);
-            promote_IC_and_node(node,IC);
+            if(!second_pass) encode(node, IC, atoi(++operand), 0, 0, 0, 0, ABSOLUTE_FLAG, 0);
+            promote_IC_and_node(node, IC);
             break;
         case DIRECT:
             encode(node, IC, base_addr, 0, 0, 0, 0, attribute, 0);
-            promote_IC_and_node(node,IC);
+            promote_IC_and_node(node, IC);
             encode(node, IC, offset, 0, 0, 0, 0, attribute, 0);
-            promote_IC_and_node(node,IC);
+            promote_IC_and_node(node, IC);
             break;
         case REGISTER_DIRECT:
             break;

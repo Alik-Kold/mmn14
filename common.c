@@ -82,22 +82,6 @@ void set_file_extention(char* filename,char** dest_pointer,const char* ext){
 }
 
 
-int bin_to_decimal(int binary_number){
-    int remainder;
-    int i = 0;
-    int hexadecimal_number = 0;
-
-    while (binary_number != 0)
-    {
-        remainder = binary_number % 10;
-        hexadecimal_number = hexadecimal_number + remainder * i;
-        i = i * 2;
-        binary_number = binary_number / 10;
-    }
-    return (hexadecimal_number);
-}
-
-
 void dec_to_binary_array(int decimal_number, int result[]){
     int i = 0;
     while (decimal_number && i <= WORD_BITS){
@@ -210,7 +194,7 @@ int line_is_too_long(const char *line) {
     if (len_line > LINE_MAX_LEN + 1){
         printf("input line too long\n"
                "line: %s\n"
-               "line length (or captured up to): %lu\n"
+               "line length (or captured up to): %u\n"
                "length allowed:                  %d\n", line, len_line, LINE_MAX_LEN);
         return 1;
     }
