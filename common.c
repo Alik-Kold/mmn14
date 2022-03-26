@@ -228,4 +228,3 @@ char *get_word(char *line, char *delim) {
     char* str = strdup(line);
     return strtok(str, delim);
 }
-

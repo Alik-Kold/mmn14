@@ -21,7 +21,10 @@ add_executable(assembler
         code.c
         artifacts.c
         precompilation.c
-        precompilation.h structs.h)
+        precompilation.h
+        structs.h
+        file_writes.c
+        file_writes.h)
 
 #set_target_properties(assembler PROPERTIES COMPILE_FLAGS "-m32" LINK_FLAGS "-m32")
 

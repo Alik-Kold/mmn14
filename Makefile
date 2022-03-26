@@ -2,9 +2,9 @@ CC = gcc
 CREATE_BIN = $(CC) -g -ansi -pedantic -Wall
 CREATE_O = $(CC) -c
 
-assembler: main.o artifacts.o code.o common.o compilation.o precompilation.o test_funcs.o
+assembler: main.o artifacts.o code.o common.o compilation.o precompilation.o test_funcs.o file_writes.o
 
-	$(CREATE_BIN) main.o artifacts.o code.o common.o compilation.o precompilation.o test_funcs.o -o assembler
+	$(CREATE_BIN) main.o artifacts.o code.o common.o compilation.o precompilation.o test_funcs.o file_writes.o -o assembler
 
 main.o: artifacts.h code.h main.c common.h compilation.h precompilation.h structs.h test_funcs.h
 
@@ -33,6 +33,10 @@ code.o: artifacts.h code.h code.c common.h compilation.h structs.h test_funcs.h
 artifacts.o: artifacts.c
 
 	$(CREATE_O) artifacts.c -o artifacts.o
+
+file_writes.o: artifacts.h code.h file_writes.c common.h compilation.h precompilation.h structs.h test_funcs.h
+
+	$(CREATE_O) file_writes.c -o file_writes.o
 
 clean:
 
