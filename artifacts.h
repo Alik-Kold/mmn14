@@ -18,25 +18,29 @@
 extern const char *COMMANDS[];
 extern const char *INSTRUCTIONS[];
 extern const char *ATTRIBUTES[];
-extern const char *OPERAND_PATTERN[];
 
+
+/*
+ * opcode values are multiples of two,
+ * in order to only toggle the appropriate bit during encoding
+ */
 enum opcodes{
-    mov_oc = 1, // 0
-    cmp_oc = 2, // 1
-    add_oc = 4,
-    sub_oc = 4, // 2
-    lea_oc = 16, // 4
-    clr_oc = 32,
+    mov_oc = 1,         /* 0 */
+    cmp_oc = 2,         /* 1 */
+    add_oc = 4,         /* 2 */
+    sub_oc = 4,
+    lea_oc = 16,        /* 4 */
+    clr_oc = 32,        /* 5 */
     not_oc = 32,
     inc_oc = 32,
-    dec_oc = 32, // 5
-    jmp_oc = 512,
+    dec_oc = 32,
+    jmp_oc = 512,       /* 9 */
     bne_oc = 512,
-    jsr_oc = 512, // 9
-    red_oc = 4096, // 12
-    prn_oc = 8192, //13
-    rts_oc = 16384, // 14
-    stop_oc = 32768, // 15
+    jsr_oc = 512,
+    red_oc = 4096,      /* 12 */
+    prn_oc = 8192,      /* 13 */
+    rts_oc = 16384,     /* 14 */
+    stop_oc = 32768,    /* 15 */
 };
 
 enum funct{
