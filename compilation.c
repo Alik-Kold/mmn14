@@ -166,7 +166,9 @@ int validate_registers(char* register_name){
 
 void compile(char* filename) {
     struct Machine_code *code_head, *data_head, *data_node, *code_node;
-    struct Symbol_table *head;
+    struct Symbol_table *head,*symbol_node;
+    struct Symbol_table *symbol_table_external_head;
+
     FILE *fd;
     char *line, *label_name, *string_value, *read_line, *am_filename;
     size_t len;
@@ -183,8 +185,13 @@ void compile(char* filename) {
     code_node = code_head;
     IC = IC_INIT, DC = 0, errors = 0;
     read_line = NULL;
+
     head = (struct Symbol_table *) malloc(sizeof (struct Symbol_table));
+    symbol_table_external_head = (struct Symbol_table *) malloc(sizeof (struct Symbol_table));
+
     memset(head, 0, sizeof (struct Symbol_table));
+    memset(symbol_table_external_head, 0, sizeof (struct Symbol_table));
+
     set_file_extention(filename,&am_filename,".am");
     fd = fopen(am_filename, "r");
 
@@ -256,7 +263,7 @@ void compile(char* filename) {
         else {
             offset = IC % WORD_BITS;
             if (symbol_def) errors += add_to_symbol_table(label_name, head, CODE, IC - offset, offset);
-            prep_command(&code_node, head, &errors, line, &IC,0);
+            prep_command(&code_node, head,0, &errors, line, &IC,0);
 
         }
 
@@ -304,7 +311,7 @@ void compile(char* filename) {
             continue;
         }
 
-        prep_command(&code_node, head, &errors, line, &IC,1);
+        prep_command(&code_node, head, symbol_table_external_head,&errors, line, &IC,1);
         read_line = NULL;
 
     }
@@ -321,6 +328,12 @@ void compile(char* filename) {
     while (code_node->next && code_node->next->position) code_node = code_node->next;
     code_node->next = data_head;
 
+    if(symbol_table_external_head->symbol)
+    {
+        symbol_node = head;
+        while(symbol_node->next && symbol_node->next->symbol) symbol_node = symbol_node->next;
+        symbol_node->next = symbol_table_external_head;
+    }
 
     print_symbol_table(head);
     print_pattern(2, "\n");

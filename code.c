@@ -231,7 +231,8 @@ void prep_data(struct Machine_code **node, int *data, int *DC, int L) {
 }
 
 
-void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_head, int *errors, char *line, int * IC,int second_pass) {
+void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_head, struct Symbol_table *symbol_table_external_head,
+                  int *errors, char *line, int * IC,int second_pass) {
     int num_of_operands, opcode, funct, dest_addr_type, dest_register = 0, src_addr_type = 0, src_register = 0, attribute;
     char * operand;
     int offset,base_addr;
@@ -333,8 +334,15 @@ void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_
                 base_addr = 0;
                 offset = 0;
                 attribute = 1;
-                symbol_table_node->base_addr = *IC;
-                symbol_table_node->offset = symbol_table_node->base_addr + 1;
+                if(symbol_table_node->base_addr != 0)
+                {
+                    add_to_symbol_table(symbol_table_node->symbol,symbol_table_external_head,EXTERNAL,*IC,*IC+1);
+                }
+                else
+                {
+                    symbol_table_node->base_addr = *IC;
+                    symbol_table_node->offset = symbol_table_node->base_addr + 1;
+                }
             }
             else {
                 operand = src_operand;
@@ -372,8 +380,15 @@ void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_
             base_addr = 0;
             offset = 0;
             attribute = 1;
-            symbol_table_node->base_addr = *IC;
-            symbol_table_node->offset = symbol_table_node->base_addr + 1;
+            if(symbol_table_node->base_addr != 0)
+            {
+                add_to_symbol_table(symbol_table_node->symbol,symbol_table_external_head,EXTERNAL,*IC,*IC+1);
+            }
+            else
+            {
+                symbol_table_node->base_addr = *IC;
+                symbol_table_node->offset = symbol_table_node->base_addr + 1;
+            }
         }
         else {
             base_addr = symbol_table_node->base_addr;
