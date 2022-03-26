@@ -150,7 +150,7 @@ int *get_data_values(char* line){
  * */
 int validate_registers(char* register_name){
     int num;
-    if (register_name[0] != 'r'){
+    if (register_name[0] != REGISTER_PREFIX_STR[0]){
         printf("index not register\n");
         return 0;
     }

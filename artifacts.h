@@ -13,17 +13,18 @@
 #define IC_MAX 8191
 #define NUM_OF_REGISTERS 16
 #define REGISTER_PREFIX_STR "r"
-#define GLUE_REGISTER(reg, n) reg # n
-
-extern const char *COMMANDS[];
-extern const char *INSTRUCTIONS[];
-extern const char *ATTRIBUTES[];
-
 
 /*
- * opcode values are multiples of two,
+ * Multiples of two,
  * in order to only toggle the appropriate bit during encoding
  */
+enum are_flags{
+    EXTERNAL_FLAG    = 1,
+    RELOCATABLE_FLAG = 2,
+    ABSOLUTE_FLAG    = 4
+};
+
+extern const char *COMMANDS[];
 enum opcodes{
     mov_oc =  1,        /* 0  */
     cmp_oc =  2,        /* 1  */
@@ -43,6 +44,10 @@ enum opcodes{
     stop_oc = 32768     /* 15 */
 };
 
+/*
+ * Enumerate existing functs
+ * Extrapolate missing functs for completeness
+ */
 enum funct{
     red_funct =  0,
     prn_funct =  0,
@@ -62,20 +67,6 @@ enum funct{
     jsr_funct =  12
 };
 
-enum addressing{
-    IMMEDIATE       = 0,
-    DIRECT          = 1,
-    INDEXING        = 2,
-    REGISTER_DIRECT = 3
-};
-
-enum attributes{
-    EXTERNAL = 0,
-    CODE     = 1,
-    ENTRY    = 2,
-    DATA     = 3
-};
-
 enum operand_types{
     NUMBER          = 0,
     LABEL           = 2,
@@ -85,14 +76,20 @@ enum operand_types{
     INDEX_REGISTER  = 7
 };
 
-/*
- * ARE flag values are multiples of two,
- * in order to only toggle the appropriate bit during encoding
- */
-enum are_flags{
-    EXTERNAL_FLAG    = 1,
-    RELOCATABLE_FLAG = 2,
-    ABSOLUTE_FLAG    = 4
+enum addressing{
+    IMMEDIATE       = 0,
+    DIRECT          = 1,
+    INDEXING        = 2,
+    REGISTER_DIRECT = 3
+};
+
+extern const char *INSTRUCTIONS[];
+extern const char *ATTRIBUTES[];
+enum attributes{
+    EXTERNAL = 0,
+    CODE     = 1,
+    ENTRY    = 2,
+    DATA     = 3
 };
 
 #endif
