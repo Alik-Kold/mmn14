@@ -342,7 +342,7 @@ void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_
                 baseaddr = 0;
                 offset = 0;
                 attribute = 1;
-                symbol_table_node->base_addr = *IC - 1;
+                symbol_table_node->base_addr = *IC;
                 symbol_table_node->offset = symbol_table_node->base_addr + 1;
             }
             else
@@ -385,7 +385,7 @@ void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_
             baseaddr = 0;
             offset = 0;
             attribute = 1;
-            symbol_table_node->base_addr = *IC - 1;
+            symbol_table_node->base_addr = *IC;
             symbol_table_node->offset = symbol_table_node->base_addr + 1;
         }
         else
