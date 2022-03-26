@@ -4,7 +4,7 @@
 static void print_pattern(unsigned int i, char * str){while(i--) printf("%s", str);}
 
 static void print_breaker(){
-    print_pattern(40, "-");
+    print_pattern(45, "-");
     printf("\n");
 }
 
@@ -34,14 +34,14 @@ void print_symbol_table(struct Symbol_table *head){
     node = head;
     while (node != NULL) {
         print_str_with_padding(max_len, node->symbol);
-        printf("%d\t\t%d\t\t%d\t\t", node->value, node->base_addr, node->offset);
+        printf("%d\t%d\t%d\t", node->value, node->base_addr, node->offset);
         for (i=0; i < LEN_INSTRUCTIONS; i++) if (node->attribute[i]) printf("%s ", ATTRIBUTES[i]);
         printf("\n");
         print_breaker();
         node = node->next;
     }
     print_breaker();
-    print_pattern(3, "\n");
+    print_pattern(2, "\n");
 }
 
 
@@ -54,14 +54,14 @@ void print_machine_code(struct Machine_code *head){
 
     print_breaker();
     print_breaker();
-    printf("position\tis_data\t\tvalues\n");
+    printf("position\tis_data\tvalues\n");
     while (node != NULL) {
         print_breaker();
-        printf("%d\t\t\t%d\t\t",node->position, node->is_data);
+        printf("%d\t\t%d\t",node->position, node->is_data);
         for (i=ARE_BITS_LEN + WORD_BITS; i >= 0 ; i--) printf("%d", node->val[i]);
         printf("\n");
         node = node->next;
     }
     print_breaker();
-    print_pattern(3, "\n");
+    print_pattern(2, "\n");
 }
