@@ -359,10 +359,7 @@ void compile(char* filename) {
         label_name = get_str_upto(line, ":");
 
 
-        // todo alik: remove the head of the label
-        /* parse opcode operands
-         *  todo alik: do exactly the same as first pass for commands, but call encode_addressing with flag second pass
-         * */
+
         if (label_name){
             full_label_name = malloc(strlen(label_name) + 2);
             strcpy(full_label_name, label_name);

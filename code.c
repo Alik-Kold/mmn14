@@ -241,8 +241,10 @@ void prep_data(struct Machine_code **node, int *data, int *DC, int L) {
     }
 }
 
+
 void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_head, int *errors, char *line, int * IC,int second_pass) {
     int num_of_operands, opcode, funct, dest_addr_type, dest_register = 0, src_addr_type = 0, src_register = 0, attribute;
+    int operand,offset,baseaddr;
     char *command_name = get_word(line, " "), *dest_operand, *src_operand;
     struct Symbol_table *symbol_table_node = symbol_table_head;
 
@@ -324,53 +326,84 @@ void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_
 
     /* ont the first iteration it will create the lines, on the second iteration it will overide them if needed*/
     if (num_of_operands == 2){
-        if(!second_pass)
-            encode_addressing(node, errors, IC, src_addr_type, src_operand, 0, 0, second_pass, 0);
-        else{
-            if(src_addr_type == DIRECT || src_addr_type == INDEXING){
-                if (src_addr_type == INDEXING)
-                    src_operand = get_str_upto(src_operand,"[");
 
-                while (symbol_table_node && strcmp(symbol_table_node->symbol,src_operand)) symbol_table_node = symbol_table_node->next;
-                if(symbol_table_node->attribute[EXTERNAL]){
-                    encode_addressing(node, errors, IC, src_addr_type, 0, 0,0, second_pass, 1);
-                    symbol_table_node->base_addr = *IC - 2;
-                    symbol_table_node->offset = symbol_table_node->base_addr + 1;
-                }
-                else
-                    encode_addressing(node, errors, IC, src_addr_type, src_operand, symbol_table_node->base_addr,
-                                      symbol_table_node->offset, second_pass, 0);
+        if(second_pass && (src_addr_type == DIRECT || src_addr_type == INDEXING)){
+            if (src_addr_type == INDEXING)
+                src_operand = get_str_upto(src_operand,"[");
+
+            while (symbol_table_node && strcmp(symbol_table_node->symbol,src_operand)) symbol_table_node = symbol_table_node->next;
+            if(symbol_table_node == NULL)
+            {
+                printf("ERROR: undefined label %s",src_operand);
+                (*errors)++;
+                return;
             }
-            else
-                encode_addressing(node, errors, IC, src_addr_type, src_operand, 0, 0, second_pass, 0);
-            //get the baseaddr and offset if label is being used, call the encode_addressing with the relevent values
-        }
-    }
-
-    symbol_table_node = symbol_table_head;
-
-    if(!second_pass)
-        encode_addressing(node, errors, IC, dest_addr_type, dest_operand, 0, 0, second_pass, 0);
-    else{
-        //get the baseaddr and offset if label is being used, call the encode_addressing with the relevent values
-        if(dest_addr_type == DIRECT || dest_addr_type == INDEXING){
-            if (dest_addr_type == INDEXING)
-                dest_operand = get_str_upto(dest_operand,"[");
-
-            while (symbol_table_node && strcmp(symbol_table_node->symbol,dest_operand)) symbol_table_node = symbol_table_node->next;
             if(symbol_table_node->attribute[EXTERNAL]){
-                encode_addressing(node, errors, IC, dest_addr_type, 0, 0,0, second_pass, 1);
+                operand = 0;
+                baseaddr = 0;
+                offset = 0;
+                attribute = 1;
                 symbol_table_node->base_addr = *IC - 2;
                 symbol_table_node->offset = symbol_table_node->base_addr + 1;
             }
             else
-                encode_addressing(node, errors, IC, dest_addr_type, dest_operand, symbol_table_node->base_addr,
-                                  symbol_table_node->offset, second_pass, 0);
+            {
+                operand = src_operand;
+                baseaddr = symbol_table_node->base_addr;
+                offset = symbol_table_node->offset;
+                attribute = 0;
+            }
         }
         else
-            encode_addressing(node, errors, IC, dest_addr_type, dest_operand, 0, 0, second_pass,
-                              0);
-
+        {
+            baseaddr = 0;
+            offset = 0;
+            operand = src_operand;
+            attribute = 0;
+        }
+        /*get the baseaddr and offset if label is being used, call the encode_addressing with the relevent values*/
+        encode_addressing(node, errors, IC, src_addr_type, operand, baseaddr, offset, second_pass, attribute);
     }
+
+
+
+    symbol_table_node = symbol_table_head;
+
+    //get the baseaddr and offset if label is being used, call the encode_addressing with the relevent values
+    if(second_pass && (dest_addr_type == DIRECT || dest_addr_type == INDEXING)){
+        if (dest_addr_type == INDEXING)
+            dest_operand = get_str_upto(dest_operand,"[");
+
+        while (symbol_table_node && strcmp(symbol_table_node->symbol,dest_operand)) symbol_table_node = symbol_table_node->next;
+        if(symbol_table_node == NULL)
+        {
+            printf("ERROR: undefined label %s",src_operand);
+            (*errors)++;
+            return;
+        }
+        if(symbol_table_node->attribute[EXTERNAL]){
+            operand = 0;
+            baseaddr = 0;
+            offset = 0;
+            attribute = 1;
+            symbol_table_node->base_addr = *IC - 2;
+            symbol_table_node->offset = symbol_table_node->base_addr + 1;
+        }
+        else
+        {
+            operand = dest_operand;
+            baseaddr = symbol_table_node->base_addr;
+            offset = symbol_table_node->offset;
+            attribute = 0;
+        }
+    }
+    else
+    {
+        baseaddr = 0;
+        offset = 0;
+        attribute = 0;
+    }
+    encode_addressing(node, errors, IC, dest_addr_type, dest_operand, baseaddr, offset, second_pass,
+                          attribute);
 
 }
