@@ -145,7 +145,9 @@ int *get_data_values(char* line){
 }
 
 
-/*check if register is between r10 and r15*/
+/*
+ * Validate register is between r10 and r15
+ * */
 int validate_registers(char* register_name){
     int num;
     if (register_name[0] != 'r'){
@@ -153,25 +155,26 @@ int validate_registers(char* register_name){
         return 0;
     }
     register_name++;
+    if (!is_number(register_name)){
+        printf("invalid register number type %s", register_name);
+        return 0;
+    }
     num = atoi(register_name);
     return ((num >= 10) && (num <= 15));
 }
 
 
 void compile(char* filename) {
-    struct  Machine_code *code_head;
-    struct  Machine_code *data_head;
-    struct Machine_code *data_node;
-    struct Machine_code *code_node;
+    struct Machine_code *code_head, *data_head, *data_node, *code_node;
     struct Symbol_table *head;
-    int IC,DC,L,errors,symbol_def,ICF,DCF,offset,*values;
     FILE *fd;
-    char *line , *label_name, *full_label_name, *string_value;
-    char* read_line;
-    char* am_filename;
+    char *line, *label_name, *string_value, *read_line, *am_filename;
     size_t len;
+    int IC, DC, L, errors, symbol_def, ICF, DCF, offset, *values;
 
-
+    /*
+     * inits and memsets
+     */
     code_head = (struct Machine_code *) malloc(sizeof (struct Machine_code));
     data_head = (struct Machine_code *) malloc(sizeof (struct Machine_code));
     data_node = data_head;
@@ -320,7 +323,7 @@ void compile(char* filename) {
 
 
     print_symbol_table(head);
-    printf("\n\n");
+    print_pattern(2, "\n");
     printf("printf instruction machine code:\n");
     print_machine_code(code_head);
 

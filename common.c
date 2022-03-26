@@ -1,14 +1,14 @@
 /*
- * common project generic functions
+ * common generic functions
  */
 #include "common.h"
 
 
 /*
- * check if string haystack start with string needle
+ * check if big string starts with little string
  */
-int starts_with(const char *haystack, const char *needle) {
-    return (!(strncmp(haystack, needle, strlen(needle))));
+int starts_with(const char *big, const char *little) {
+    return (!(strncmp(big, little, strlen(little))));
 }
 
 
@@ -25,6 +25,7 @@ char* trim_whitespaces(char *str){
         return default_val;
     return strndup(str, l);
 }
+
 
 unsigned int count_words(char *str){
     int state = 0;
@@ -56,11 +57,12 @@ unsigned int count_words(char *str){
 
 
 int is_number(char* str){
-    int i=0, length;
+    int i;
+    long unsigned int length;
     if (!str) return 0;
     if ((str[0] == '+') || (str[0] == '-')) str++;
     length = strlen (str);
-    for (;i<length; i++) if (!isdigit(str[i])) return 0;
+    for (i = 0; i<length; i++) if (!isdigit(str[i])) return 0;
     return 1;
 }
 
@@ -105,6 +107,7 @@ void handle_binary_array_of_negative(int len, int result[]){
         if (result[i] < 0) result[i] = 0;   /* clearing negative */
         else result[i] ^= 1;
 }
+
 
 /*
  * Get string and delimiter
@@ -193,6 +196,7 @@ int line_is_too_long(const char *line) {
     return 0;
 }
 
+
 char* get_str_upto(char* line, char* delim){
     size_t len = strcspn(line, delim);
     if (len && len < strlen(line)) return strndup(line, len);
@@ -205,6 +209,7 @@ char* extract_string(char* str, char* delim_start, char* delim_end){
     if (start) return get_str_upto(++start, delim_end);
     return NULL;
 }
+
 
 char bin_to_hex(int binary_number){
     int num = binary_number;
@@ -227,4 +232,22 @@ char bin_to_hex(int binary_number){
 char *get_word(char *line, char *delim) {
     char* str = strdup(line);
     return strtok(str, delim);
+}
+
+
+void print_pattern(unsigned int i, char * str){
+    while(i--) printf("%s", str);
+}
+
+
+void print_breaker(){
+    print_pattern(45, "-");
+    printf("\n");
+}
+
+
+void print_str_with_padding(size_t max_pad, const char *str) {
+    int i;
+    printf("%s", str);
+    for (i=0; i < max_pad + 1 - strlen(str); i++) printf(" ");
 }

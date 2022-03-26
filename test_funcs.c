@@ -1,20 +1,6 @@
 #include "test_funcs.h"
 
 
-static void print_pattern(unsigned int i, char * str){while(i--) printf("%s", str);}
-
-static void print_breaker(){
-    print_pattern(45, "-");
-    printf("\n");
-}
-
-static void print_str_with_padding(size_t max_pad, const char *str) {
-    int i;
-    printf("%s", str);
-    for (i=0; i < max_pad + 1 - strlen(str); i++) printf(" ");
-}
-
-
 /*
  * Print out all values in Symbol_table
  * */

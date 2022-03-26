@@ -25,41 +25,41 @@ extern const char *ATTRIBUTES[];
  * in order to only toggle the appropriate bit during encoding
  */
 enum opcodes{
-    mov_oc = 1,         /* 0 */
-    cmp_oc = 2,         /* 1 */
-    add_oc = 4,         /* 2 */
-    sub_oc = 4,
-    lea_oc = 16,        /* 4 */
-    clr_oc = 32,        /* 5 */
-    not_oc = 32,
-    inc_oc = 32,
-    dec_oc = 32,
-    jmp_oc = 512,       /* 9 */
-    bne_oc = 512,
-    jsr_oc = 512,
-    red_oc = 4096,      /* 12 */
-    prn_oc = 8192,      /* 13 */
-    rts_oc = 16384,     /* 14 */
-    stop_oc = 32768    /* 15 */
+    mov_oc =  1,        /* 0  */
+    cmp_oc =  2,        /* 1  */
+    add_oc =  4,        /* 2  */
+    sub_oc =  4,        /* 2  */
+    lea_oc =  16,       /* 4  */
+    clr_oc =  32,       /* 5  */
+    not_oc =  32,       /* 5  */
+    inc_oc =  32,       /* 5  */
+    dec_oc =  32,       /* 5  */
+    jmp_oc =  512,      /* 9  */
+    bne_oc =  512,      /* 9  */
+    jsr_oc =  512,      /* 9  */
+    red_oc =  4096,     /* 12 */
+    prn_oc =  8192,     /* 13 */
+    rts_oc =  16384,    /* 14 */
+    stop_oc = 32768     /* 15 */
 };
 
 enum funct{
-    red_funct = 0,
-    prn_funct = 0,
-    mov_funct = 0,
-    cmp_funct = 0,
-    lea_funct = 0,
-    rts_funct = 0,
+    red_funct =  0,
+    prn_funct =  0,
+    mov_funct =  0,
+    cmp_funct =  0,
+    lea_funct =  0,
+    rts_funct =  0,
     stop_funct = 0,
-    add_funct = 10,
-    sub_funct = 11,
-    clr_funct = 10,
-    not_funct = 11,
-    inc_funct = 12,
-    dec_funct = 13,
-    jmp_funct = 10,
-    bne_funct = 11,
-    jsr_funct = 12
+    add_funct =  10,
+    sub_funct =  11,
+    clr_funct =  10,
+    not_funct =  11,
+    inc_funct =  12,
+    dec_funct =  13,
+    jmp_funct =  10,
+    bne_funct =  11,
+    jsr_funct =  12
 };
 
 enum addressing{
@@ -90,9 +90,9 @@ enum operand_types{
  * in order to only toggle the appropriate bit during encoding
  */
 enum are_flags{
-    ABSOLUTE_FLAG    = 4,
+    EXTERNAL_FLAG    = 1,
     RELOCATABLE_FLAG = 2,
-    EXTERNAL_FLAG    = 1
+    ABSOLUTE_FLAG    = 4
 };
 
 #endif

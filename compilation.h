@@ -1,5 +1,5 @@
 /*
- * Bigass compilation file, including 1st and 2nd passes
+ * Compilation file, including 1st and 2nd passes
  */
 #ifndef PROJECT_COMPILATION_H
 #define PROJECT_COMPILATION_H
