@@ -1,13 +1,6 @@
 #include "code.h"
 
 
-/*
- * Encode string to machine code
- */
-int encode_string(char* str){
-    return 1;
-}
-
 int unexpected_instruction_error(char *instruction, int num_of_operands) {
     printf("\nUnexpected instruction %s for number of operands received %d\n", instruction, num_of_operands);
     return 1;

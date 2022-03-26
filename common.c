@@ -155,11 +155,11 @@ void write_line_to_file(const char *line, FILE *am_file) {
 }
 
 
+/* strndup actually exists in string.h now,
+ * but is defined by the posix 2008 standard,
+ * and wasn't around in the ansi c days.
+ * Pasting it here for the make warning to go away*/
 char *strndup(const char *s, size_t n) {
-    /* strndup actually exists in string.h now,
-     * but is defined by the posix 2008 standard,
-     * and wasn't around in the ansi c days.
-     * Pasting it here for the make warning to go away*/
     char *p;
     size_t n1;
 
@@ -208,12 +208,8 @@ int line_is_too_long(const char *line) {
 
 
 char* get_str_upto(char* line, char* delim){
-    char* place = strstr(line, delim);
-    int len;
-    if (place){
-        len = place - line;
-        return strndup(line, len);
-    }
+    size_t len = strcspn(line, delim);
+    if (len && len < strlen(line)) return strndup(line, len);
     return NULL;
 }
 
