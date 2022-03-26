@@ -31,4 +31,4 @@ struct Macro_list{
     struct Macro_list* next;
 };
 
-#endif //PROJECT_STRUCTS_H
+#endif

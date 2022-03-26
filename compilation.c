@@ -2,24 +2,29 @@
 
 
 void create_output_files(struct Symbol_table *pTable, struct Machine_code *pCode,char* filename,int ICF, int DCF) {
-    char *ext_file_name, *ent_file_name, *ob_file_name, line[80], group_name = 'A';
+    char *ext_file_name, *ent_file_name, *ob_file_name, line[80], group_name ;
+    struct Symbol_table *table_point;
+    FILE* ext, *ent,*ob;
+    char head_title[80];
+    int number, i;
+    char ascii_value;
+    int DC;
+
     set_file_extention(filename,&ext_file_name,".ext");
     set_file_extention(filename,&ent_file_name,".ent");
     set_file_extention(filename,&ob_file_name,".ob");
-    struct Symbol_table *table_point = pTable;
 
-    FILE* ext = fopen(ext_file_name,"w");
-    FILE* ent = fopen(ent_file_name,"w");
-    FILE* ob = fopen(ob_file_name,"w");
-    char head_title[80];
+    ext = fopen(ext_file_name,"w");
+    ent = fopen(ent_file_name,"w");
+    ob = fopen(ob_file_name,"w");
 
-    sprintf(head_title,"%d %d \n",ICF - IC_INIT , DCF);
+
+    table_point = pTable;
+    sprintf(head_title,"%d %d\n",ICF - IC_INIT , DCF);
 
     fwrite(head_title,strlen(head_title),1,ob);
 
-    int number, i =0;
-    char ascii_value;
-    int DC = 100;
+    DC = 100;
     while(table_point){
         if (table_point->attribute[EXTERNAL]) {
             sprintf(line,"%s BASE %d\n",table_point->symbol,table_point->base_addr);
@@ -40,7 +45,7 @@ void create_output_files(struct Symbol_table *pTable, struct Machine_code *pCode
         group_name = 'A';
         reverse_array(pCode->val, 20);
         for (i = 0; i < 5 ; i++){
-            //i - i+4
+
             number = pCode->val[i * 4] * 1000 + pCode->val[i*4 + 1] * 100 + pCode->val[i*4 + 2] * 10 + pCode->val[i*4 + 3] * 1;
             ascii_value = bin_to_hex(number);
             if      (i == 0)
@@ -111,7 +116,6 @@ int add_to_symbol_table(char *label_name, struct Symbol_table *head, int attr_ty
 
 
 void update_data_symbols_positions(struct Symbol_table *head, int ICF){
-    int errors = 0;
     struct Symbol_table *point;
     point = head;
     while(point){
@@ -163,11 +167,12 @@ int update_symbol_table_attribute(struct Symbol_table *head, char *symbol, int a
 int *get_data_values(char* line){
     char* number_str = remove_head(line, ".data");
     int* numbers;
-    int is_minus = 1, i = 0, list_len = 0, data_len = 0;
+    struct Numbers_struct *head;
+    int is_minus, i = 0, list_len = 0, data_len;
     struct Numbers_struct *nums = (struct Numbers_struct*) malloc(sizeof(struct Numbers_struct));
     nums->next = NULL;
-    struct Numbers_struct *head = nums;
 
+    head = nums;
     number_str = trim_whitespaces(number_str);
     data_len = count_occurrences(number_str, ',');
     if (data_len){
@@ -209,36 +214,42 @@ int *get_data_values(char* line){
 
 /*check if register is between r10 and r15*/
 int validate_registers(char* register_name){
+    int num;
     if (register_name[0] != 'r'){
         printf("index not register\n");
         return 0;
     }
     register_name++;
-    int num;
     num = atoi(register_name);
     return ((num >= 10) && (num <= 15));
 }
 
 
 void compile(char* filename) {
-    struct  Machine_code *code_head = (struct Machine_code *) malloc(sizeof (struct Machine_code));
-    struct  Machine_code *data_head = (struct Machine_code *) malloc(sizeof (struct Machine_code));
-    struct Machine_code *data_node = data_head;
+    struct  Machine_code *code_head;
+    struct  Machine_code *data_head;
+    struct Machine_code *data_node;
+    struct Machine_code *code_node;
+    struct Symbol_table *head;
+    int IC,DC,L,errors,symbol_def,ICF,DCF,offset,*values;
+    FILE *fd;
+    char *line , *label_name, *full_label_name, *string_value;
+    char* am_filename;
+    size_t len;
+
+
+    code_head = (struct Machine_code *) malloc(sizeof (struct Machine_code));
+    data_head = (struct Machine_code *) malloc(sizeof (struct Machine_code));
+    data_node = data_head;
     memset(code_head, 0, sizeof (struct Machine_code));
     memset(data_head, 0, sizeof (struct Machine_code));
-    struct Machine_code *code_node = code_head;
-    int IC = IC_INIT, DC = 0, L, errors = 0, symbol_def = 0, ICF, DCF, offset, arr_len, *values;
-    char *line = NULL;  //= (char*) malloc(LINE_MAX_LEN + 1),
-    char *label_name, *full_label_name, *string_value;
-    size_t len;
-    struct Symbol_table *head = (struct Symbol_table *) malloc(sizeof (struct Symbol_table));
+    code_node = code_head;
+    IC = IC_INIT, DC = 0, errors = 0;
+    line = NULL;
+    head = (struct Symbol_table *) malloc(sizeof (struct Symbol_table));
     memset(head, 0, sizeof (struct Symbol_table));
-    struct Symbol_table *point = head;
-    char* am_filename;
     set_file_extention(filename,&am_filename,".am");
-
-
-    FILE *fd = fopen(am_filename, "r");
+    fd = fopen(am_filename, "r");
 
     /* 1st pass */
     while (getline(&line, &len, fd) != -1) {
@@ -340,15 +351,10 @@ void compile(char* filename) {
     /* 2nd pass */
     line = NULL;
     while (getline(&line, &len, fd) != -1) {
-        symbol_def = 0;
         line = trim_whitespaces(line);
         if(strlen(line) < 2 || line[0] == ';') continue;
 
-        if (strstr(line, ".data") || strstr(line, ".string")) {
-            continue;
-        } else if (strstr(line, ".extern") != NULL) {
-            continue;
-        }
+        if (strstr(line, ".data") || strstr(line, ".string") || strstr(line, ".extern")) continue;
 
         if (strstr(line, ".entry") != NULL) {
             label_name = trim_whitespaces(remove_head(line,".entry"));

@@ -20,4 +20,4 @@ void encode(struct Machine_code **node, int * counter, int start, int dest_regis
             int src_addr_type, int src_register, int funct, int attribute, int is_data);
 void promote_IC_and_node(struct Machine_code **node,int *IC);
 
-#endif //PROJECT_CODINGS_H
+#endif

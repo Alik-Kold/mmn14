@@ -31,4 +31,4 @@ char *strndup(const char *, size_t);
 char bin_to_hex(int binary_number);
 
 
-#endif //PROJECT_COMMON_H
+#endif

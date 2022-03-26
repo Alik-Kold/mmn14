@@ -24,4 +24,4 @@ int update_symbol_table_attribute(struct Symbol_table *head, char *symbol, int a
 int *get_data_values(char* line);
 char *get_word(char *line, char *delim);
 
-#endif //PROJECT_COMPILATION_H
+#endif

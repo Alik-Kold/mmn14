@@ -40,7 +40,7 @@ enum opcodes{
     red_oc = 4096,      /* 12 */
     prn_oc = 8192,      /* 13 */
     rts_oc = 16384,     /* 14 */
-    stop_oc = 32768,    /* 15 */
+    stop_oc = 32768    /* 15 */
 };
 
 enum funct{
@@ -59,21 +59,21 @@ enum funct{
     dec_funct = 13,
     jmp_funct = 10,
     bne_funct = 11,
-    jsr_funct = 12,
+    jsr_funct = 12
 };
 
 enum addressing{
     IMMEDIATE       = 0,
     DIRECT          = 1,
     INDEXING        = 2,
-    REGISTER_DIRECT = 3,
+    REGISTER_DIRECT = 3
 };
 
 enum attributes{
     EXTERNAL = 0,
     CODE     = 1,
     ENTRY    = 2,
-    DATA     = 3,
+    DATA     = 3
 };
 
 enum operand_types{
@@ -82,7 +82,7 @@ enum operand_types{
     REGISTER        = 3,
     INDEX_NUMBER    = 5,
     INDEX_LABEL     = 6,
-    INDEX_REGISTER  = 7,
+    INDEX_REGISTER  = 7
 };
 
 /*
@@ -92,7 +92,7 @@ enum operand_types{
 enum are_flags{
     ABSOLUTE_FLAG    = 4,
     RELOCATABLE_FLAG = 2,
-    EXTERNAL_FLAG    = 1,
+    EXTERNAL_FLAG    = 1
 };
 
-#endif //PROJECT_ARTIFACTS_H
+#endif /*PROJECT_ARTIFACTS_H*/

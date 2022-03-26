@@ -83,7 +83,7 @@ int get_addr_type(int opcode, int operand_type, int src){
     }
     if (operand_type == LABEL){
         if (src){
-            if (opcode != mov_oc && opcode != cmp_oc && opcode != add_oc && opcode != lea_oc) // list of allowed methods
+            if (opcode != mov_oc && opcode != cmp_oc && opcode != add_oc && opcode != lea_oc) /* list of allowed methods */
                 return -1;
         }
         else{
@@ -94,7 +94,7 @@ int get_addr_type(int opcode, int operand_type, int src){
     }
     if (operand_type == INDEX_REGISTER){
         if (src){
-            if (opcode != mov_oc && opcode != cmp_oc && opcode != add_oc && opcode != sub_oc && opcode != lea_oc) // list of allowed methods
+            if (opcode != mov_oc && opcode != cmp_oc && opcode != add_oc && opcode != sub_oc && opcode != lea_oc) /* list of allowed methods */
                 return -1;
         }
         else{
@@ -105,7 +105,7 @@ int get_addr_type(int opcode, int operand_type, int src){
     }
     if (operand_type == REGISTER){
         if (src){
-            if (opcode != mov_oc && opcode != cmp_oc && opcode != add_oc) // list of allowed methods
+            if (opcode != mov_oc && opcode != cmp_oc && opcode != add_oc) /* list of allowed methods */
                 return -1;
         }
         else{
@@ -244,7 +244,8 @@ void prep_data(struct Machine_code **node, int *data, int *DC, int L) {
 
 void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_head, int *errors, char *line, int * IC,int second_pass) {
     int num_of_operands, opcode, funct, dest_addr_type, dest_register = 0, src_addr_type = 0, src_register = 0, attribute;
-    int operand,offset,baseaddr;
+    char * operand;
+    int offset,baseaddr;
     char *command_name = get_word(line, " "), *dest_operand, *src_operand;
     struct Symbol_table *symbol_table_node = symbol_table_head;
 
@@ -369,7 +370,7 @@ void prep_command(struct Machine_code **node, struct Symbol_table *symbol_table_
 
     symbol_table_node = symbol_table_head;
 
-    //get the baseaddr and offset if label is being used, call the encode_addressing with the relevent values
+    /* get the baseaddr and offset if label is being used, call the encode_addressing with the relevent values */
     if(second_pass && (dest_addr_type == DIRECT || dest_addr_type == INDEXING)){
         if (dest_addr_type == INDEXING)
             dest_operand = get_str_upto(dest_operand,"[");

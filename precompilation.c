@@ -15,23 +15,26 @@ int validate_macro_name(char* labelname){
 
 int extract_macros(char * filename){
     struct Macro_list *macros_head;
-    macros_head = (struct Macro_list*)malloc(sizeof (struct Macro_list));
-    struct Macro_list *macro_pointer = macros_head;
+    struct Macro_list *macro_pointer;
     char *as_file_name, *am_file_name, *line = NULL;
     size_t len = 0;
     int read, line_len, is_macro = 0;
     char* macro_name;
+    FILE* am_file;
+    FILE* as_file;
 
+    macros_head = (struct Macro_list*)malloc(sizeof (struct Macro_list));
+    macro_pointer = macros_head;
     set_file_extention(filename,&as_file_name,".as");
     set_file_extention(filename,&am_file_name,".am");
 
-    FILE* as_file = fopen(as_file_name, "r");
+    as_file = fopen(as_file_name, "r");
     if (as_file == NULL){
         printf("Couldn't open %s\n"
                "Please make sure file exists and has read permissions\n", as_file_name);
         return 0;
     }
-    FILE* am_file = fopen(am_file_name,"w");
+    am_file = fopen(am_file_name,"w");
 
     /*extract macros from file and add to linked list */
     while ((read = getline(&line, &len, as_file)) != -1) {
