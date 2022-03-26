@@ -22,11 +22,13 @@ int extract_macros(char * filename){
     char* macro_name;
     FILE* am_file;
     FILE* as_file;
-
+    char *line_read;
     macros_head = (struct Macro_list*)malloc(sizeof (struct Macro_list));
     macro_pointer = macros_head;
     set_file_extention(filename,&as_file_name,".as");
     set_file_extention(filename,&am_file_name,".am");
+
+    line_read = (char*)malloc(LINE_MAX_LEN);
 
     as_file = fopen(as_file_name, "r");
     if (as_file == NULL){
@@ -37,12 +39,14 @@ int extract_macros(char * filename){
     am_file = fopen(am_file_name,"w");
 
     /*extract macros from file and add to linked list */
-    while ((read = getline(&line, &len, as_file)) != -1) {
+    while ((read = getline(&line_read, &len, as_file)) != -1) {
         /*
          * if the line is not a macro do nothing
          * if the line is a macro: save it to the linked list
          */
-        line = trim_whitespaces(line);
+        line = trim_whitespaces(line_read);
+        if(strlen(line) < 1)
+            continue;
         line_len = 0;
         if (starts_with(line, "macro")){
             while (macro_pointer->next) macro_pointer = macro_pointer->next;
@@ -52,7 +56,7 @@ int extract_macros(char * filename){
                 printf("Error: %s is a saved word unable to create macro with the same name",macro_name);
                 return 0;
             }
-            macro_pointer->name = (char*) malloc(strlen(macro_name));
+            macro_pointer->name = (char*) malloc(strlen(macro_name) + 1);
             strcpy(macro_pointer->name, macro_name);
             is_macro = 1;
             continue;
@@ -62,19 +66,21 @@ int extract_macros(char * filename){
                 line = trim_whitespaces(line);
                 if (!starts_with(line, "endm")){
                     if (line_len == 0){
-                        macro_pointer->lines = (char*)malloc(strlen(line));
-                        line_len += strlen(line);
+                        macro_pointer->lines = (char*)malloc(strlen(line) + 1);
+                        line_len += strlen(line) +1;
                         memset(macro_pointer->lines,0,line_len);
                     }
                     else{
-                        line_len += strlen(line);
-                        macro_pointer->lines = realloc(macro_pointer->lines, line_len);
+                        line_len += strlen(line) +1;
+                        macro_pointer->lines = realloc(macro_pointer->lines, line_len +1);
                         strcat(macro_pointer->lines,"\n");
                     }
                     strcat(macro_pointer->lines,line);
                 }
-                getline(&line, &len, as_file);
-                line = trim_whitespaces(line);
+                getline(&line_read, &len, as_file);
+                line = trim_whitespaces(line_read);
+                if(strlen(line) < 1)
+                    continue;
             } while (strcmp(line, "endm") != 0 && read != -1);
             is_macro = 0;
         }
@@ -82,16 +88,20 @@ int extract_macros(char * filename){
 
     fseek(as_file, 0, SEEK_SET);
     /*create the am file using the macros saved in the linked list */
-    while ((read = getline(&line, &len, as_file)) != -1) {
+    while ((read = getline(&line_read, &len, as_file)) != -1) {
         /*
          * if the line is not macro save it to the second file
          * if the line is macro search for the macro in the linked list and write it to the second file
          */
-        line = trim_whitespaces(line);
+        line = trim_whitespaces(line_read);
+        if(strlen(line) < 1)
+            continue;
         if (starts_with(line, "macro")){
             while(!starts_with(line, "endm")){
-                getline(&line, &len, as_file);
-                line = trim_whitespaces(line);
+                getline(&line_read, &len, as_file);
+                line = trim_whitespaces(line_read);
+                if(strlen(line) < 1)
+                    continue;
             }
             continue;
         }

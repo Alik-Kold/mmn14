@@ -234,6 +234,7 @@ void compile(char* filename) {
     int IC,DC,L,errors,symbol_def,ICF,DCF,offset,*values;
     FILE *fd;
     char *line , *label_name, *full_label_name, *string_value;
+    char* read_line;
     char* am_filename;
     size_t len;
 
@@ -245,20 +246,20 @@ void compile(char* filename) {
     memset(data_head, 0, sizeof (struct Machine_code));
     code_node = code_head;
     IC = IC_INIT, DC = 0, errors = 0;
-    line = NULL;
+    read_line = NULL;
     head = (struct Symbol_table *) malloc(sizeof (struct Symbol_table));
     memset(head, 0, sizeof (struct Symbol_table));
     set_file_extention(filename,&am_filename,".am");
     fd = fopen(am_filename, "r");
 
     /* 1st pass */
-    while (getline(&line, &len, fd) != -1) {
+    while (getline(&read_line, &len, fd) != -1) {
         symbol_def = 0;
-        if (line_is_too_long(line)) {
+        if (line_is_too_long(read_line)) {
             errors++;
             continue;
         }
-        line = trim_whitespaces(line);
+        line = trim_whitespaces(read_line);
         if(strlen(line) < 2 || line[0] == ';') continue;
 
         /*
@@ -330,7 +331,7 @@ void compile(char* filename) {
                    "Exiting\n", IC_MAX - IC_INIT);
             return;
         }
-        line = NULL;
+        read_line = NULL;
     }
 
     ICF = IC;
@@ -349,9 +350,9 @@ void compile(char* filename) {
     data_node = data_head;
 
     /* 2nd pass */
-    line = NULL;
-    while (getline(&line, &len, fd) != -1) {
-        line = trim_whitespaces(line);
+    read_line = NULL;
+    while (getline(&read_line, &len, fd) != -1) {
+        line = trim_whitespaces(read_line);
         if(strlen(line) < 2 || line[0] == ';') continue;
 
         if (strstr(line, ".data") || strstr(line, ".string") || strstr(line, ".extern")) continue;
@@ -376,7 +377,7 @@ void compile(char* filename) {
         }
 
         prep_command(&code_node, head, &errors, line, &IC,1);
-        line = NULL;
+        read_line = NULL;
 
     }
 

@@ -16,11 +16,13 @@ int starts_with(const char *a, const char *b) {
  * trim leading and trailing spaces
  */
 char* trim_whitespaces(char *str){
+    char* default_val = "";
     int l = strlen(str);
 
-    while(isspace(str[l - 1])) --l;
+    while(l >= 1 && isspace(str[l - 1])) --l;
     while(* str && isspace(* str)) ++str, --l;
-
+    if(l < 0)
+        return default_val;
     return strndup(str, l);
 }
 
@@ -28,22 +30,24 @@ unsigned int count_words(char *str){
     int state = 0;
     unsigned int word_count = 0;
 
-    // Scan all characters one by one
+    /* Scan all characters one by one */
     while (*str){
-        // If next character is a separator, set the
-        // state as OUT
+
+        /* // If next character is a separator, set the
+        // state as OUT */
         if (*str == ' ' || *str == '\n' || *str == '\t')
             state = 0;
 
+        /*
         // If next character is not a word separator and
         // state is OUT, then set the state as IN and
-        // increment word count
+        // increment word count */
         else if (state == 0){
             state = 1;
             ++word_count;
         }
 
-        // Move to next character
+        /* Move to next character */
         ++str;
     }
 
@@ -131,8 +135,15 @@ void handle_binary_array_of_negative(int len, int result[]){
  * return string after first occurrence of delimiter
  */
 char* remove_head(char* str,char* delimiter){
-    char* new = malloc(strlen(str) - strlen(delimiter) +1);
+    int str_len;
+    char* new = "";
+
+    str_len = strlen(str) - strlen(delimiter) + 1;
+    if(str_len <= 1)
+        return new;
+    new = malloc(str_len);
     memset(new,0,strlen(str) - strlen(delimiter) + 1);
+
     strcpy(new,str + strlen(delimiter) + 1);
     return new;
 }
