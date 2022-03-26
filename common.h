@@ -17,7 +17,7 @@ void write_line_to_file(const char *, FILE *);
 int count_occurrences(char* str, char char_);
 int is_number(char* str);
 int line_is_too_long(const char *line);
-int starts_with(const char *a, const char *b);
+int starts_with(const char *haystack, const char *needle);
 int validate_printable_only(char *str);
 unsigned int count_words(char *str);
 char *extract_string(char* line, char* delim_start, char* delim_end);

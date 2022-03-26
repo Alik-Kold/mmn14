@@ -271,20 +271,18 @@ void compile(char* filename) {
          */
         label_name = get_str_upto(line, ":");
         if (label_name) {
-            symbol_def = 1;
             errors += validate_label(label_name);
-            full_label_name = malloc(strlen(label_name) + 2);
-            strcpy(full_label_name, label_name);
-            strcat(full_label_name, ":");
-            line = remove_head(line,full_label_name);
             line = trim_whitespaces(line);
+            line += strlen(label_name) + 1;
+            line = trim_whitespaces(line);
+            symbol_def = 1;
         }
 
         /*
          * Handle entry/extern input
          */
-        if (strstr(line, ".entry")) continue;
-        if (strstr(line, ".extern")) {
+        if (starts_with(line, ".entry")) continue;
+        if (starts_with(line, ".extern")) {
             label_name = remove_head(line,".extern");
             errors += add_to_symbol_table(label_name, head, EXTERNAL, 0, 0);
             continue;
@@ -293,10 +291,10 @@ void compile(char* filename) {
         /*
          * Handle data input
          */
-        if (strstr(line, ".data") || strstr(line, ".string")) {
+        if (starts_with(line, ".data") || starts_with(line, ".string")) {
             if (symbol_def) errors += add_to_symbol_table(label_name, head, DATA, DC, 0);
 
-            if (strstr(line, ".string")){
+            if (starts_with(line, ".string")){
                 string_value = extract_string(line, "\"", "\"");
                 if (!validate_printable_only(string_value)){
                     errors++;
@@ -355,25 +353,19 @@ void compile(char* filename) {
         line = trim_whitespaces(read_line);
         if(strlen(line) < 2 || line[0] == ';') continue;
 
-        if (strstr(line, ".data") || strstr(line, ".string") || strstr(line, ".extern")) continue;
+        label_name = get_str_upto(line, ":");
+        if (label_name){
+            line = trim_whitespaces(line);
+            line += strlen(label_name) + 1;
+            line = trim_whitespaces(line);
+        }
 
-        if (strstr(line, ".entry") != NULL) {
+        if (starts_with(line, ".data") || starts_with(line, ".string") || starts_with(line, ".extern"))
+            continue;
+        if (starts_with(line, ".entry")) {
             label_name = trim_whitespaces(remove_head(line,".entry"));
             errors += update_symbol_table_attribute(head, label_name, ENTRY, EXTERNAL);
             continue;
-        }
-
-        label_name = get_str_upto(line, ":");
-
-
-
-        if (label_name){
-            full_label_name = malloc(strlen(label_name) + 2);
-            strcpy(full_label_name, label_name);
-            strcat(full_label_name, ":");
-            line = remove_head(line,full_label_name);
-            line = trim_whitespaces(line);
-
         }
 
         prep_command(&code_node, head, &errors, line, &IC,1);

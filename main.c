@@ -7,7 +7,6 @@
 int main(int argc, char *argv[]) {
     int i = 1;
     for (; i < argc; i++){
-
         if (!extract_macros(argv[i])){
             printf("Precompilation error in file\n"
                    "Skipping this one\n");

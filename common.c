@@ -5,10 +5,10 @@
 
 
 /*
- * check if string a start with string b
+ * check if string haystack start with string needle
  */
-int starts_with(const char *a, const char *b) {
-    return (!(strncmp(a, b, strlen(b))));
+int starts_with(const char *haystack, const char *needle) {
+    return (!(strncmp(haystack, needle, strlen(needle))));
 }
 
 
@@ -54,14 +54,6 @@ unsigned int count_words(char *str){
     return word_count;
 }
 
-void dec_to_binary(int n, int binaryNum[32]){
-    int i = 0;
-    while (n > 0) {
-        binaryNum[i] = n % 2;
-        n = n / 2;
-        i++;
-    }
-}
 
 int is_number(char* str){
     int i=0, length;
@@ -214,6 +206,9 @@ char* extract_string(char* str, char* delim_start, char* delim_end){
     return NULL;
 }
 
+/*
+ * todo: figure out last two lines - how to improve?
+ */
 char bin_to_hex(int binary_number){
     int num = binary_number;
     int dec_value = 0;
