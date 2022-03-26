@@ -20,31 +20,26 @@ int unexpected_addressing_type_error(int addr_type) {
 }
 
 /*
- * receive operand string str
- * return operand type enum
+ * Receive operand string str
+ * Return operand type enum
  */
 static int analyze_operand(char* operand){
     size_t str_len = 1; /* LABEL_MAX_LEN == 32 */
     int register_compare, i;
-    char * str = trim_whitespaces(operand);
+    char * str = trim_whitespaces(operand), num_of_registers[11];
 
     if (!operand) return -1;
 
-    if (str[0] == '#') str++;
-    if (str[0] == '+' || str[0] == '-' || isdigit(str[0])){
-        str++;
-        while (str[0] != 0) {
-            if (!(isdigit(str[0]))) return -1;
-            str++;
-        }
-        return NUMBER;
-    }
-    if (str[0] == REGISTER_PREFIX_STR[0] && strlen(str) <= 3){
-        str++;
+    if (str[0] == '#') return (is_number(++str)) ?  NUMBER : -1;
+
+    sprintf(num_of_registers, "%d", NUM_OF_REGISTERS);
+    if (str[0] == REGISTER_PREFIX && strlen(str) <= 1 + strlen(num_of_registers)){
+        ++str;
         register_compare = atoi(str);
         for (i=0; i < NUM_OF_REGISTERS; i++) if (register_compare == i) return REGISTER;
-        str--;
+        --str;
     }
+
     if (isalpha(str[0])){
         str++;
         while(str[0] != 0){
