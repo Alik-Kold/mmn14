@@ -14,4 +14,4 @@
 void create_output_files(struct Symbol_table *pTable, struct Machine_code *pCode,char* filename,int ICF, int DCF);
 
 
-#endif //MMN14_FILE_WRITES_H
+#endif

@@ -95,4 +95,4 @@ enum are_flags{
     EXTERNAL_FLAG    = 1
 };
 
-#endif /*PROJECT_ARTIFACTS_H*/
+#endif
