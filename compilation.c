@@ -313,8 +313,15 @@ void compile(char* filename) {
             prep_command(&code_node, head, &errors, line, &IC,0);
 
         }
+
+        if (IC + DC > IC_MAX - IC_INIT){
+            printf("Instruction set exceeds max allowed length of %d\n"
+                   "Exiting\n", IC_MAX - IC_INIT);
+            return;
+        }
         line = NULL;
     }
+
     ICF = IC;
     DCF = DC;
     if (errors) {
@@ -330,13 +337,7 @@ void compile(char* filename) {
     code_node = code_head;
     data_node = data_head;
 
-
     /* 2nd pass */
-    /* todo: update lucid re 2nd pass
-     * todo alik: refactor so there are two machine code nodes, one pointing for the data and one pointing
-     * for the instrctions. once finished first pass, append ICF to DC and make the last node of the
-     * machine code point to the first node of the data node and the we can skip all .entry .extern and only care about commands
-     */
     line = NULL;
     while (getline(&line, &len, fd) != -1) {
         symbol_def = 0;
@@ -372,7 +373,6 @@ void compile(char* filename) {
         }
 
         prep_command(&code_node, head, &errors, line, &IC,1);
-
         line = NULL;
 
     }
