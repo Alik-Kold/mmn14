@@ -9,12 +9,12 @@ void create_output_files(struct Symbol_table *pTable, struct Machine_code *pCode
     char ascii_value;
     int DC;
 
+    ext = NULL, ent = NULL;
     set_file_extention(filename,&ext_file_name,".ext");
     set_file_extention(filename,&ent_file_name,".ent");
     set_file_extention(filename,&ob_file_name,".ob");
 
-    ext = fopen(ext_file_name,"w");
-    ent = fopen(ent_file_name,"w");
+
     ob = fopen(ob_file_name,"w");
 
 
@@ -26,12 +26,16 @@ void create_output_files(struct Symbol_table *pTable, struct Machine_code *pCode
     DC = 100;
     while(table_point){
         if (table_point->attribute[EXTERNAL]) {
+            if(!ext)
+                ext = fopen(ext_file_name,"w");
             sprintf(line,"%s BASE %d\n",table_point->symbol,table_point->base_addr);
             fwrite(line, strlen(line),1,ext);
             sprintf(line,"%s OFFSET %d\n\n",table_point->symbol,table_point->offset);
             fwrite(line, strlen(line),1,ext);
         }
         if (table_point->attribute[ENTRY]) {
+            if(!ent)
+                ent = fopen(ent_file_name,"w");
             sprintf(line,"%s,%d,%d\n",table_point->symbol,table_point->base_addr,table_point->offset);
             fwrite(line, strlen(line),1,ent);
         }
@@ -61,7 +65,9 @@ void create_output_files(struct Symbol_table *pTable, struct Machine_code *pCode
         pCode = pCode->next;
     }
 
-    fclose(ext);
-    fclose(ent);
+    if(ext)
+        fclose(ext);
+    if(ent)
+        fclose(ent);
     fclose(ob);
 }
