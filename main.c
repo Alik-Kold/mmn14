@@ -1,5 +1,5 @@
 /*
- * Entry point for maman14 Assembler project
+ * maman14 Assembler project
  * Course number    20465
  * Semester         Fall 2022a
  * Collaborators:
@@ -20,6 +20,12 @@
 #include "compilation.h"
 #include "precompilation.h"
 
+/*
+ * Entry point for Assembler flow
+ * @param argc - number of filepaths to process
+ * @param argv - array of strings of the filepaths
+ * @return run success
+ */
 int main(int argc, char *argv[]) {
     int i = 1;
     for (; i < argc; i++){
