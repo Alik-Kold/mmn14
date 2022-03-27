@@ -284,6 +284,11 @@ void compile(char* filename) {
 
                 L = count_occurrences(line, ',') + 1;
                 values = get_data_values(line);
+                if (!values)
+                {
+                    errors ++;
+                    continue;
+                }
                 prep_data(&data_node, values, &DC, L);
             }
             continue;
