@@ -95,7 +95,7 @@ int update_symbol_table_attribute(struct Symbol_table *head, char *symbol, int a
                 return 0;
             }
             if (point->attribute[collision]){
-                printf("ERROR: attempted to colliding attribute in symbol %s\n"
+                printf("ERROR: attempted to add colliding attribute in symbol %s\n"
                        "%s - %s\n", point->symbol, ATTRIBUTES[collision], ATTRIBUTES[attribute]);
                 return 1;
             }
@@ -315,7 +315,10 @@ void compile(char* filename) {
     ICF = IC;
     DCF = DC;
     if (errors) {
-        printf("%d errors found, stopping after 1st pass\n", errors);
+        printf("%d errors found, stopping after 1st pass\n"
+               "Dumping internal state\n", errors);
+        print_symbol_table(head);
+        print_machine_code(code_head);
         return;
     }
 
@@ -378,7 +381,6 @@ void compile(char* filename) {
         printf("%d errors found, stopping after 2nd pass\n"
                "Dumping internal state\n", errors);
         print_symbol_table(head);
-        print_pattern(2, "\n");
         print_machine_code(code_head);
         return;
     }
