@@ -369,18 +369,14 @@ void compile(char* filename) {
         symbol_node->next = symbol_table_external_head;
     }
 
-/*
- * Debugging printouts of symbol table and machine code before writing them to file
- * We weren't sure how you'd feel about adding support to debug flags (out os scope for this project)
- * So we're just commenting these out.
- * Please uncomment, recompile and run to behold their glorious sight
- */
-/*
-    print_symbol_table(head);
-    print_pattern(2, "\n");
-    printf("printf instruction machine code:\n");
-    print_machine_code(code_head);
-*/
-    if (errors) return;
+    if (errors) {
+        printf("%d errors found, stopping after 2nd pass\n"
+               "Dumping internal state\n", errors);
+        print_symbol_table(head);
+        print_pattern(2, "\n");
+        print_machine_code(code_head);
+        return;
+    }
+
     create_output_files(head,code_head,filename,ICF,DCF);
 }

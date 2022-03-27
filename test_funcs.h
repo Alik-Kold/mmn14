@@ -1,5 +1,5 @@
 /*
- * Test functions module for dev testing
+ * Prints of internal state
  */
 
 #ifndef PROJECT_TEST_FUNCS_H
