@@ -14,8 +14,9 @@ int validate_command_name(char *command_name){
 }
 
 
-int unexpected_addressing_type_error(int addr_type) {
-    printf("Unexpected addressing type - %d\n", addr_type);
+int unexpected_addressing_type_error(int addr_type, const char *operand) {
+    printf("Unexpected addressing type - %d\n"
+           "for operand %s\n", addr_type, operand);
     return 1;
 }
 
@@ -163,7 +164,7 @@ static void get_operand_params(int *errors, int opcode, int src, char *operand, 
             (*register_num) = atoi(operand);
             break;
         default:
-            (*errors) += unexpected_addressing_type_error((*addr_type));
+            (*errors) += unexpected_addressing_type_error((*addr_type), operand);
             break;
     }
 }
@@ -203,7 +204,7 @@ static void encode_addressing(struct Machine_code **node, int *errors, int *IC, 
             promote_counter_and_node(node, IC);
             break;
         default:
-            (*errors) += unexpected_addressing_type_error(addr_type);
+            (*errors) += unexpected_addressing_type_error(addr_type, operand);
             break;
     }
 }
